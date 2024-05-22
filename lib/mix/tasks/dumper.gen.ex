@@ -19,7 +19,7 @@ defmodule Mix.Tasks.Dumper.Gen do
 
   ## Example
 
-      $ mix dumper.gen :my_app
+      $ mix dumper.gen
 
   ## Requirements
 

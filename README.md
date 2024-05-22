@@ -13,6 +13,8 @@ controller and components necessary to do that.
 
 Dumper only works with Phoenix 1.7+ applications that use Ecto.
 
+By default, Dumper also displays module docs for each schema.  To do this, your project must include [Earmark](https://hexdocs.pm/earmark/Earmark.html) as a dependency.
+
 
 ## About
 

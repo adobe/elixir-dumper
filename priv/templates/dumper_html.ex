@@ -84,4 +84,28 @@ defmodule <%= @web_module %>.DumperHTML do
   defp fields([record | _]), do: record.__struct__.__schema__(:fields)
   defp embeds([record | _]), do: record.__struct__.__schema__(:embeds)
   defp redacted_fields(record), do: record.__struct__.__schema__(:redact_fields)
+
+  attr :module, :atom, required: true
+
+  defp docs(assigns) do
+    doctext =
+      case Code.fetch_docs(assigns.module) do
+        {_, _, _, _, %{"en" => doctext} = _module_doc, _, _} -> String.trim(doctext)
+        _ -> ""
+      end
+
+    markdown_html =
+      doctext
+      |> Earmark.as_html!(code_class_prefix: "lang- language-")
+      |> Phoenix.HTML.raw()
+
+    assigns = assign(assigns, markdown: markdown_html, doctext: doctext)
+
+    ~H"""
+    <details :if={@doctext != ""} class="markdown mb-4">
+      <summary class="cursor-pointer">Documentation</summary>
+      <div class="mt-[.5rem]"><%%= @markdown %></div>
+    </details>
+    """
+  end
 end
