@@ -11,13 +11,24 @@
 defmodule Dumper.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+  @url "https://github.com/adobe/elixir-dumper"
+
   def project do
     [
       app: :dumper,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+
+      ## Hex
+      package: package(),
+      description: "A mix task to generate an interactive view of your database",
+
+      # Docs
+      name: "Dumper",
+      docs: docs()
     ]
   end
 
@@ -31,8 +42,28 @@ defmodule Dumper.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:ex_doc, "~> 0.33", runtime: false, only: :dev}
+    ]
+  end
+
+  defp package do
+    [
+      maintainers: ["Ryan Young"],
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => @url}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      assets: "assets",
+      source_ref: "v#{@version}",
+      source_url: @url,
+      extras: [
+        "CHANGELOG.md": [title: "Changelog"],
+        "README.md": [title: "Dumper"],
+      ]
     ]
   end
 end

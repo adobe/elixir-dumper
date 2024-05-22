@@ -6,7 +6,7 @@ Dumper uses reflection to find all your app's ecto schemas and provide routes
 to browse their data.  This library provides a mix task to generate the
 controller and components necessary to do that.
 
-![dumper](https://github.com/ryoung786/dumper/assets/122238/2a2bfd8f-fdf1-4d1d-9477-4a0f96a64a34)
+![dumper](assets/dumper.gif)
 
 
 ## Requirements
