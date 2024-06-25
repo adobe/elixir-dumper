@@ -36,7 +36,7 @@ Add `dumper` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:dumper, "~> 0.1.0", only: [:dev]}
+    {:dumper, "~> 0.1.1", only: [:dev]}
   ]
 end
 ```
