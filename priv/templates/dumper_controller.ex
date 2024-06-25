@@ -19,8 +19,8 @@ defmodule <%= @web_module %>.DumperController do
     render(conn, :home, modules: Enum.filter(modules, &is_ecto_schema?/1))
   end
 
-  def resource(conn, %{"id" => id, "resource" => resource}) do
-    # This handles routes like /foo?id=1234, which is used by the "Find by ID" form on index pages.
+  def resource(conn, %{"search_id" => id, "resource" => resource}) do
+    # This handles routes like /foo?search_id=1234, which is used by the "Find by ID" form on index pages.
     conn |> redirect(to: ~p"/dumper/#{resource}/#{id}") |> halt()
   end
 
