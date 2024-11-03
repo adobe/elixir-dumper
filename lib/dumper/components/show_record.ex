@@ -35,7 +35,7 @@ defmodule Dumper.ShowRecord do
     <div :for={{assoc, result} <- @associations} :if={!Enum.empty?(result.entries)}>
       <details open>
         <summary class="mb-[0.5rem] cursor-pointer">
-          <h4 class="inline" id={assoc} ><%= humanize_association_name(assoc) %></h4>
+          <h4 class="inline" id={assoc}><%= humanize_association_name(assoc) %></h4>
         </summary>
         <div class="mb-4"><.table_records records={result.entries} /></div>
         <.pagination records={result} assoc={assoc} />

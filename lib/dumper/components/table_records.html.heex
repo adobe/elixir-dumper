@@ -5,7 +5,10 @@
 <div class="card tabular-card mb-4 mt-4">
   <div class="card-body p-0">
     <div class="dash-table-wrapper">
-      <table :if={!Enum.empty?(@records)} class="table table-sm table-hover table-bordered mt-0 dash-table">
+      <table
+        :if={!Enum.empty?(@records)}
+        class="table table-sm table-hover table-bordered mt-0 dash-table"
+      >
         <thead class="">
           <tr>
             <th :for={field <- fields(@records)} :if={field not in embeds(@records)} class="">

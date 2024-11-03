@@ -68,7 +68,7 @@ defmodule Dumper.MixProject do
       source_url: @url,
       extras: [
         "CHANGELOG.md": [title: "Changelog"],
-        "README.md": [title: "Dumper"],
+        "README.md": [title: "Dumper"]
       ]
     ]
   end

@@ -9,6 +9,8 @@ defmodule Dumper.LiveDashboardPage do
   import Dumper.ShowRecord
   import Ecto.Query
 
+  @assoc_page_size 5
+
   @impl true
   def menu_link(_, _) do
     {:ok, "Dumper"}
@@ -43,7 +45,7 @@ defmodule Dumper.LiveDashboardPage do
     associations =
       Enum.map(module.__schema__(:associations), fn assoc ->
         pagenum = Map.get(params, to_string(assoc), 1)
-        page_params = %{"pagenum" => pagenum, "page_size" => 2}
+        page_params = %{"pagenum" => pagenum, "page_size" => @assoc_page_size}
         {assoc, Dumper.paginate(from(u in Ecto.assoc(record, assoc)), page_params)}
       end)
 
@@ -100,18 +102,10 @@ defmodule Dumper.LiveDashboardPage do
     {:noreply, push_patch(socket, to: to)}
   end
 
-  def handle_event("to-page", %{"pagenum" => pagenum, "assoc" => assoc}, socket) do
-    if assoc do
-      to =
-        PageBuilder.live_dashboard_path(socket, socket.assigns.page, %{
-          String.to_atom(assoc) => pagenum
-        })
-
-      {:noreply, push_patch(socket, to: to)}
-    else
-      to = PageBuilder.live_dashboard_path(socket, socket.assigns.page, pagenum: pagenum)
-      {:noreply, push_patch(socket, to: to)}
-    end
+  def handle_event("to-page", %{"pagenum" => pagenum} = params, socket) do
+    param = if params["assoc"], do: String.to_atom(params["assoc"]), else: :pagenum
+    to = PageBuilder.live_dashboard_path(socket, socket.assigns.page, %{param => pagenum})
+    {:noreply, push_patch(socket, to: to)}
   end
 
   def handle_event("select_limit", %{"limit" => limit}, socket) do
