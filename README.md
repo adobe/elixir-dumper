@@ -2,9 +2,7 @@
 
 _Takes your data and dumps it to the screen!_
 
-Dumper uses reflection to find all your app's ecto schemas and provide routes
-to browse their data.  This library provides a mix task to generate the
-controller and components necessary to do that.
+Dumper uses reflection to find all your app's ecto schemas and provide routes to browse their data.  This library provides a mix task to generate the controller and components necessary to do that.
 
 ![dumper](assets/dumper.gif)
 
@@ -12,9 +10,6 @@ controller and components necessary to do that.
 ## Requirements
 
 Dumper only works with Phoenix 1.7+ applications that use Ecto.
-
-By default, Dumper also displays module docs for each schema.  To do this, your project must include [Earmark](https://hexdocs.pm/earmark/Earmark.html) as a dependency.
-
 
 ## About
 
@@ -36,93 +31,122 @@ Add `dumper` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:dumper, "~> 0.2.0", only: [:dev]}
+    {:dumper, "~> 0.2.0"}
   ]
 end
 ```
 
-Update the dependencies and compile:
-```sh
-$ mix deps.get
-$ mix compile
+Add the following to your `config.exs` to point `dumper` to your Ecto Repo:
+```elixir
+config :dumper, repo: MyApp.Repo
 ```
 
-Run the `dumper.gen` mix task:
-
-```sh
-$ mix dumper.gen
-* creating lib/foo_web/controllers/dumper_controller.ex
-* creating lib/foo_web/controllers/dumper_html.ex
-* creating lib/foo_web/controllers/dumper_html/index.html.heex
-* creating lib/foo_web/controllers/dumper_html/show.html.heex
-* creating lib/foo_web/controllers/dumper_html/home.html.heex
-* creating lib/foo_web/controllers/dumper_html/table_records.html.heex
-* creating lib/foo_web/controllers/dumper_html/pagination.html.heex
-
-Add the following routes to router:
-
-    get "/dumper", DumperController, :home
-    get "/dumper/*resource", DumperController, :resource
-
-It's recommended to put these routes behind some kind of admin plug or environment check
-to avoid potentially leaking access to the public.
-```
-
-Like the output suggests, add the following routes to your router:
+Install and configure [Phoenix Live Dashboard](https://hexdocs.pm/phoenix_live_dashboard) if you haven't already.  Then modify `router.ex` to include the `dumper` as a plugin:
 
 ``` elixir
-get "/dumper", DumperController, :home
-get "/dumper/*resource", DumperController, :resource
+live_dashboard "/dashboard", additional_pages: [dumper: Dumper.LiveDashboardPage]
 ```
 
-It's recommended to put these routes behind some kind of admin plug or environment check to avoid potentially leaking access to the public.  For example:
-
-``` elixir
-scope "/dumper" do
-  pipe_through [:browser, :require_admin_user]
-
-  get "/", DumperController, :home
-  get "/*resource", DumperController, :resource
-end
-```
-
+You can now run your web app, navigate to dumper tab within the live dashboard, and view all your data.
 
 ## Customization
 
-The Dumper is a mix generator, not a library, so once you run it you are free (and encouraged!) to modify the generated files to suit your needs.
+### Config Module
+It is *highly recommended* to customize the `dumper`.  To do so, you can optionally define a module that implements the `Dumper.Config` behavior.  Add it to the `config.exs`:
 
-It is *highly recommended* to add your own `DumperHTML.value/1` function definitions to customize how certain fields, data types, and values are displayed.
+``` diff
+ config :dumper,
+   repo: MyApp.Repo,
++  config_module: MyApp.DumperConfig
+```
 
-### Examples
+Here's an example config module:
 
-To make all `user_id` column values render a link to that specific user:
 ``` elixir
-defp value(%{field: :user_id} = assigns) do
-  ~H"""
-  <a href={~p"/dumper/users/user/#{@value}"}><%= @value %></a>
-  """
+defmodule MyApp.DumperConfig do
+  use Dumper.Config
+
+  @impl Dumper.Config
+  def ids_to_schema() do
+    %{
+      patron_id: Library.Patrons.Patron,
+      book_id: Library.Books.Book,
+      author_id: Library.Authors.Author
+    }
+  end
+
+  @impl Dumper.Config
+  def display(%{field: :last_name} = assigns) do
+    ~H|<span style="color: red"><%= @value %></span>|
+  end
+end
+
+```
+
+Let's take a look at each optional function and what it accomplishes.
+
+### ids_to_schema/0
+
+``` elixir
+@impl Dumper.Config
+def ids_to_schema() do
+  %{
+    patron_id: Library.Patrons.Patron,
+    book_id: Library.Books.Book,
+    author_id: Library.Authors.Author
+  }
 end
 ```
 
-But maybe the `user_id` on the `books` table refers to the author.  Pattern match on the module as well to provide the different implementation:
+You can override the `Dumper.Config.ids_to_schema/0` function to provide a map of id names (as atoms) to their corresponding schema modules.  In the above example, when displaying any field/column named `patron_id`, instead of just printing the value, it will render a clickable link to that specific record.  This allows you to quickly and easily navigate through your data by clicking connected links.
+
+![dumper](assets/no-links-vs-links.png)
+
+### display/1
+
+The `Dumper.Config.display/1` override allows even total control of how any value is displayed.  Here's an example of what `assigns` might contain, which you can then pattern match on:
+
 ``` elixir
-defp value(%{module: Book, field: :user_id} = assigns) do
-  ~H"""
-  <a href={~p"/dumper/authors/author/#{@value}"}><%= @value %></a>
-  """
+%{
+  module: Library.Authors.Author,
+  field: :last_name,
+  resource: %Library.Authors.Author{ ... },
+  value: "Smith",
+  type: :binary, # the Ecto data type
+  redacted: false
+%}
+```
+
+So for example, if you wanted every last name to be red except for the Author table, which should have blue last names, you could do the following:
+
+``` elixir
+@impl Dumper.Config
+def display(%{field: :last_name, module: Library.Authors.Author} = assigns) do
+  ~H|<span style="color: blue"><%= @value %></span>|
+end
+
+def display(%{field: :last_name} = assigns) do
+  ~H|<span style="color: red"><%= @value %></span>|
 end
 ```
 
-Editing the `controllers/dumper_html.ex` file is a great way to customize the Dumper to your specific application and business logic needs.
+This is admittedly a contrived example, but it can be very useful if you want to change how a particular field, an entire table, or data type is displayed
+
+#### CSS Styling
+
+Note that LiveDashboard ships with [Bootstrap 4.6](https://getbootstrap.com/docs/4.6), so you are free to use Bootstrap classes in your styling to help achieve a consistent look and feel.
 
 
-## Default Behaviour you may want to change
+## Other notes
 
 ### Rendering Embeds
-The index page and association tables on the show page by default omit columns that are embeds.  This is purely for display purposes, as those values tend to take up a lot of vertical space.  If you'd like them to be displayed, remove the `:if={field not in embeds(@records)}` on lines `10` and `19` of your generated `dumper_html/table_records.html.heex` file.
+The index page and association tables on the show page by default omit columns that are embeds.  This is purely for display purposes, as those values tend to take up a lot of vertical space.  This is currently not configurable, but may be in the future.
 
 ### Redactions
-By default, schema fields with `redact: true` are hidden and replaced with the text `redacted`.  If you're running the Dumper in a non-production environment or against dummy data, you may want to disregard the redacted fields.  To do that, you can delete or modify the `defp value(%{redacted: true}) ...` function definition on lines `17-20` of `controllers/dumper_html.ex`.
+By default, schema fields with `redact: true` are hidden and replaced with the text `redacted`.  If you're running the Dumper in a non-production environment or against dummy data, you may want to disregard the redacted fields.  To do that, you can add a `display/1` function head like the following:
 
-### Tailwind
-The dumper uses tailwind classes to give it some basic styling, since it is included by default with the most recent phoenix generators.  If your project doesn't use tailwind, they won't have an effect, and you are free to delete or replace them once generated.
+``` elixir
+def display(%{redacted: true} = assigns), do: ~H|<%= @value %>|
+```
+
+You can refine that down to a specific schema and/or field as well by pattern matching the assigns.
