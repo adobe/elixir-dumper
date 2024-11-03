@@ -49,10 +49,10 @@ You can now run your web app, navigate to dumper tab within the live dashboard, 
 ### Config Module
 It is *highly recommended* to customize the `dumper`.  To do so, you can optionally define a module that implements the `Dumper.Config` behavior.  Add it to the `config.exs`:
 
-``` diff
- config :dumper,
-   repo: MyApp.Repo,
-+  config_module: MyApp.DumperConfig
+``` elixir
+config :dumper,
+  repo: MyApp.Repo,
+  config_module: MyApp.DumperConfig # <---- add this
 ```
 
 Here's an example config module:

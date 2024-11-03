@@ -2,7 +2,8 @@ defmodule Dumper.Config do
   @moduledoc """
   Provides sensible defaults for how data should be rendered.
 
-  If you'd like your own customizations, add, for example:
+  If you'd like your own customizations, define a module that implements
+  the `m:Dumper.Config` behaviour:
 
       # An example dumper config module
       defmodule MyApp.DumperConfig do
@@ -26,11 +27,18 @@ defmodule Dumper.Config do
 
       config :dumper,
         repo: MyApp.Repo,
-      + config_module: MyApp.DumperConfig
+        config_module: MyApp.DumperConfig # <---- add this
 
-  See `ids_to_schema/0` for examples of how you can configure
-  automatic links of ids to records, and `display/1` for examples of fine-grained
-  control over how column values are rendered.  You can define one, both, or neither of them.
+  See `c:ids_to_schema/0` for examples of how you can configure
+  automatic links of ids to records, and `c:display/1` for examples of fine-grained
+  control over how column values are rendered.
+
+  The `use Dumper.Config` brings in the default definitions of behavior, so you can
+  choose to define one, both, or neither of them.  As such, even this is a valid implementation:
+
+      defmodule MyApp.DumperConfig do
+        use Dumper.Config
+      end
   """
 
   @doc """
