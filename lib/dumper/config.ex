@@ -64,7 +64,6 @@ defmodule Dumper.Config do
   """
   @callback ids_to_schema() :: :map
 
-
   @doc """
   Fine-grained control over how any field is rendered.  This is a functional component that takes
   in an `assigns` map and returns a valid `heex` expression.

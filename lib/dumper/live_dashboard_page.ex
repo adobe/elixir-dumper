@@ -74,6 +74,7 @@ defmodule Dumper.LiveDashboardPage do
   def render(assigns) do
     ~H"""
     <div id="dumper">
+      <div class="mb-3"><a href="#" phx-click="dumper-home">Dumper Home</a></div>
       <.show_table_names :if={@action == :show_table_names} {assigns} />
       <.show_table :if={@action == :show_table} {assigns} />
       <.show_record :if={@action == :show_record} {assigns} />
@@ -105,6 +106,11 @@ defmodule Dumper.LiveDashboardPage do
   def handle_event("to-page", %{"pagenum" => pagenum} = params, socket) do
     param = if params["assoc"], do: String.to_atom(params["assoc"]), else: :pagenum
     to = PageBuilder.live_dashboard_path(socket, socket.assigns.page, %{param => pagenum})
+    {:noreply, push_patch(socket, to: to)}
+  end
+
+  def handle_event("dumper-home", _params, socket) do
+    to = PageBuilder.live_dashboard_path(socket, %{socket.assigns.page | params: %{}})
     {:noreply, push_patch(socket, to: to)}
   end
 

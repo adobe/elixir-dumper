@@ -88,8 +88,8 @@ defmodule Dumper do
   def default_style_value(%{type: type} = assigns)
       when type in ~w/utc_datetime_usec naive_datetime_usec utc_datetime naive_datetime/a do
     ~H"""
-      <span><%= Calendar.strftime(@value, "%b %d, %Y") %></span> &nbsp;
-      <span><%= Calendar.strftime(@value, "%I:%M:%S.%f %p") %></span>
+    <span><%= Calendar.strftime(@value, "%b %d, %Y") %></span>
+    &nbsp; <span><%= Calendar.strftime(@value, "%I:%M:%S.%f %p") %></span>
     """
   end
 
