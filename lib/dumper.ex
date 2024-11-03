@@ -59,6 +59,7 @@ defmodule Dumper do
   def fields([record | _]), do: record.__struct__.__schema__(:fields)
   def embeds([record | _]), do: record.__struct__.__schema__(:embeds)
   def redacted_fields(record), do: record.__struct__.__schema__(:redact_fields)
+  def custom_record_links(record), do: config_module().custom_record_links(record)
 
   def value(assigns) do
     config_module().display(assigns)

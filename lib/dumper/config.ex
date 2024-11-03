@@ -1,5 +1,5 @@
 defmodule Dumper.Config do
-  @moduledoc """
+  @moduledoc ~S"""
   Provides sensible defaults for how data should be rendered.
 
   If you'd like your own customizations, define a module that implements
@@ -21,6 +21,14 @@ defmodule Dumper.Config do
         def display(%{field: :last_name} = assigns) do
           ~H|<span style="color: red"><%= @value %></span>|
         end
+
+        @impl Dumper.Config
+        def custom_record_links(%Library.Book{} = book) do
+          [
+            {~p"/logging/#{book.id}", "Logs"},
+            {"https://goodreads.com/search?q=#{book.title}", "Goodreads"},
+          ]
+        end
       end
 
   Then tell your `config.exs` where to find the module:
@@ -30,11 +38,13 @@ defmodule Dumper.Config do
         config_module: MyApp.DumperConfig # <---- add this
 
   See `c:ids_to_schema/0` for examples of how you can configure
-  automatic links of ids to records, and `c:display/1` for examples of fine-grained
-  control over how column values are rendered.
+  automatic links of ids to records, `c:display/1` for examples of fine-grained
+  control over how column values are rendered, and `c:custom_record_links/1` for examples of
+  how to add custom metadata to the record page.
 
   The `use Dumper.Config` brings in the default definitions of behavior, so you can
-  choose to define one, both, or neither of them.  As such, even this is a valid implementation:
+  choose to define one, all, or none of them.  As such, even this is a valid implementation
+  (although it would be functionally the same as not defining a config module at all):
 
       defmodule MyApp.DumperConfig do
         use Dumper.Config
@@ -101,6 +111,32 @@ defmodule Dumper.Config do
   """
   @callback display(assigns :: map) :: Phoenix.LiveView.Rendered.t()
 
+  @doc ~S"""
+  Custom links rendered when viewing a specific record.
+
+  This function takes a record you can pattern match on, and must return a list of `{route, text}`
+  tuples.
+
+      @impl Dumper.Config
+      def custom_record_links(%Book{} = book) do
+        [
+          {~p"/logging/#{book.id}", "Logs"},
+          {"https://goodreads.com/search?q=#{book.title}", "Goodreads"},
+        ]
+      end
+
+      def custom_record_links(%Ticket{} = ticket),
+        do: [{"https://jira.com/#{ticket.project}/#{ticket.id}", "Jira"}]
+
+  In the above example, any `Book` record you visit in the Dumper will display two links labelled
+  "Logs" and "Goodreads" at the top of the page.  Any `Ticket` record will likewise display one
+  link, "Jira", in that spot.  Routes can be internal or external, verified routes, or plain strings.
+
+  Logs, dashboards, traces, support portals, etc are all common use cases, but any `{route, text}`
+  pair is possible.
+  """
+  @callback custom_record_links(record :: map) :: [{route :: binary, display_text :: binary}]
+
   use Phoenix.Component
 
   defmacro __using__(_opts) do
@@ -113,8 +149,17 @@ defmodule Dumper.Config do
       def ids_to_schema(), do: %{}
 
       @before_compile {Dumper.Config, :add_display_fallback}
+      @before_compile {Dumper.Config, :add_custom_record_links_fallback}
 
       defoverridable ids_to_schema: 0
+    end
+  end
+
+  @doc false
+  defmacro add_custom_record_links_fallback(_env) do
+    quote do
+      @impl true
+      def custom_record_links(_), do: []
     end
   end
 
@@ -130,6 +175,9 @@ defmodule Dumper.Config do
 
   @doc false
   def ids_to_schema(), do: %{}
+
+  @doc false
+  def custom_record_links(_), do: []
 
   @doc false
   def display(assigns), do: default_display(assigns)

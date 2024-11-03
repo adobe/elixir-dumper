@@ -6,11 +6,24 @@ defmodule Dumper.ShowRecord do
 
   def show_record(assigns) do
     ~H"""
-    <PageBuilder.card_title title={module_name(@module)} />
-    <.module_link module={@module}>See all</.module_link>
+    <div class="d-flex justify-content-between align-items-baseline">
+      <div class="d-flex align-items-baseline">
+        <PageBuilder.card_title title={module_name(@module)} />
+        <span class="ml-3">
+          <.module_link module={@module}>See all</.module_link>
+        </span>
+      </div>
+
+      <div class="btn-group rounded border" role="group" aria-label="Basic example">
+        <a :for={{route, text} <- custom_record_links(@record)} href={route} class="btn btn-link">
+          <%= text %>
+        </a>
+      </div>
+    </div>
+
     <.docs module={@module} />
 
-    <div class="card tabular-card mb-4 mt-4">
+    <div class="card tabular-card mb-4 mt-2">
       <div class="card-body p-0">
         <div class="dash-table-wrapper">
           <table class="table table-sm table-hover table-bordered mt-0 dash-table">

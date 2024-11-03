@@ -73,11 +73,19 @@ defmodule MyApp.DumperConfig do
   def display(%{field: :last_name} = assigns) do
     ~H|<span style="color: red"><%= @value %></span>|
   end
+
+  @impl Dumper.Config
+  def custom_record_links(%Library.Book{} = book) do
+    [
+      {~p"/logging/#{book.id}", "Logs"},
+      {"https://goodreads.com/search?q=#{book.title}", "Goodreads"},
+    ]
+  end
 end
 
 ```
 
-Take a look a `c:Dumper.Config.ids_to_schema/0` and `c:Dumper.Config.display/1` for more information on how each optional function lets you customize how your data is rendered.
+Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.display/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
 
 ![dumper](assets/no-links-vs-links.png)
 
