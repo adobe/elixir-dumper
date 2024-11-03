@@ -1,0 +1,27 @@
+<div>
+  <%= if @records.has_prev? do %>
+  <a
+    phx-click="to-page"
+    phx-value-pagenum={@records.page - 1}
+    phx-value-assoc={@assoc}
+    href="#"
+    >
+      Prev
+    </a>
+  <% else %>
+    <span>Prev</span>
+  <% end %>
+
+  <%= if @records.has_next? do %>
+  <a
+    phx-click="to-page"
+    phx-value-pagenum={@records.page + 1}
+    phx-value-assoc={@assoc}
+    href="#"
+    >
+      Next
+    </a>
+  <% else %>
+    <span>Next</span>
+  <% end %>
+</div>

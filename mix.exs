@@ -42,6 +42,12 @@ defmodule Dumper.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:earmark, "~> 1.4"},
+      {:ecto, "~> 3.7"},
+      {:phoenix_ecto, "~> 4.4"},
+      {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:phoenix_live_view, "~> 0.19.0"},
+      {:phoenix_html, "~> 3.3"},
       {:ex_doc, "~> 0.33", runtime: false, only: :dev}
     ]
   end

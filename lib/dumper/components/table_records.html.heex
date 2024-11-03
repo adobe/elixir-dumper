@@ -1,0 +1,39 @@
+<p :if={Enum.empty?(@records)} class="italic">
+  No records
+</p>
+
+<div class="card tabular-card mb-4 mt-4">
+  <div class="card-body p-0">
+    <div class="dash-table-wrapper">
+      <table :if={!Enum.empty?(@records)} class="table table-sm table-hover table-bordered mt-0 dash-table">
+        <thead class="">
+          <tr>
+            <th :for={field <- fields(@records)} :if={field not in embeds(@records)} class="">
+              <%= field %>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr :for={record <- @records}>
+            <td :for={field <- fields(@records)} :if={field not in embeds(@records)} class="">
+              <%= if field == :id do %>
+                <.record_link module={record.__struct__} record_id={record.id}>
+                  <%= record.id %>
+                </.record_link>
+              <% else %>
+                <.value
+                  module={record.__struct__}
+                  field={field}
+                  resource={record}
+                  value={Map.get(record, field)}
+                  type={record.__struct__.__schema__(:type, field)}
+                  redacted={field in redacted_fields(record)}
+                />
+              <% end %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
