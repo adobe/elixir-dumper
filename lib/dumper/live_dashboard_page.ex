@@ -90,7 +90,7 @@ defmodule Dumper.LiveDashboardPage do
         | params: %{"action" => "show_table", "module" => module}
       })
 
-    {:noreply, push_patch(socket, to: to)}
+    {:noreply, push_navigate(socket, to: to)}
   end
 
   def handle_event("show_record", %{"module" => module, "id" => record_id}, socket) do
@@ -100,7 +100,7 @@ defmodule Dumper.LiveDashboardPage do
         | params: %{"action" => "show_record", "module" => module, "id" => record_id}
       })
 
-    {:noreply, push_patch(socket, to: to)}
+    {:noreply, push_navigate(socket, to: to)}
   end
 
   def handle_event("to-page", %{"pagenum" => pagenum} = params, socket) do
@@ -111,7 +111,7 @@ defmodule Dumper.LiveDashboardPage do
 
   def handle_event("dumper-home", _params, socket) do
     to = PageBuilder.live_dashboard_path(socket, %{socket.assigns.page | params: %{}})
-    {:noreply, push_patch(socket, to: to)}
+    {:noreply, push_navigate(socket, to: to)}
   end
 
   def handle_event("select_limit", %{"limit" => limit}, socket) do

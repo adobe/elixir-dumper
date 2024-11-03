@@ -23,7 +23,8 @@ defmodule Dumper.ShowTableNames do
     %{search: search, sort_by: _sort_by, sort_dir: sort_dir, limit: limit} = params
     search = (search || "") |> String.downcase()
 
-    {:ok, modules} = :application.get_key(:library, :modules)
+    otp_app = Application.fetch_env!(:dumper, :otp_app)
+    {:ok, modules} = :application.get_key(otp_app, :modules)
 
     modules =
       modules

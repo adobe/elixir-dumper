@@ -37,8 +37,10 @@ defmodule Dumper.ShowRecord do
         <summary>
           <span><%= humanize_association_name(assoc) %></span>
         </summary>
-        <div class="mb-4"><.table_records records={result.entries} /></div>
-        <.pagination records={result} assoc={assoc} />
+        <div class="d-flex flex-column mb-4" style="gap: 0.5rem">
+          <.table_records records={result.entries} />
+          <.pagination records={result} assoc={assoc} />
+        </div>
       </details>
     </div>
     """

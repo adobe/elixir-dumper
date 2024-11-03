@@ -28,7 +28,7 @@ defmodule Dumper.ShowTable do
       </div>
     </form>
 
-    <div class="mb-4">
+    <div class="mb-2">
       <.table_records records={@records.entries} />
     </div>
 

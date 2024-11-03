@@ -33,7 +33,7 @@ end
 
 Add the following to your `config.exs` to point `dumper` to your Ecto Repo:
 ```elixir
-config :dumper, repo: MyApp.Repo
+config :dumper, repo: MyApp.Repo, otp_app: :my_app
 ```
 
 Install and configure [Phoenix Live Dashboard](https://hexdocs.pm/phoenix_live_dashboard) if you haven't already.  Then modify `router.ex` to include the `dumper` as a plugin:
