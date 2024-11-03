@@ -64,9 +64,8 @@ defmodule MyApp.DumperConfig do
   @impl Dumper.Config
   def ids_to_schema() do
     %{
-      patron_id: Library.Patrons.Patron,
-      book_id: Library.Books.Book,
-      author_id: Library.Authors.Author
+      book_id: Library.Book,
+      author_id: Library.Author
     }
   end
 
@@ -78,58 +77,9 @@ end
 
 ```
 
-Let's take a look at each optional function and what it accomplishes.
-
-### ids_to_schema/0
-
-``` elixir
-@impl Dumper.Config
-def ids_to_schema() do
-  %{
-    patron_id: Library.Patrons.Patron,
-    book_id: Library.Books.Book,
-    author_id: Library.Authors.Author
-  }
-end
-```
-
-You can override the `Dumper.Config.ids_to_schema/0` function to provide a map of id names (as atoms) to their corresponding schema modules.  In the above example, when displaying any field/column named `patron_id`, instead of just printing the value, it will render a clickable link to that specific record.  This allows you to quickly and easily navigate through your data by clicking connected links.
+Take a look a `c:Dumper.Config.ids_to_schema/0` and `c:Dumper.Config.display/1` for more information on how each optional function lets you customize how your data is rendered.
 
 ![dumper](assets/no-links-vs-links.png)
-
-### display/1
-
-The `Dumper.Config.display/1` override allows even total control of how any value is displayed.  Here's an example of what `assigns` might contain, which you can then pattern match on:
-
-``` elixir
-%{
-  module: Library.Authors.Author,
-  field: :last_name,
-  resource: %Library.Authors.Author{ ... },
-  value: "Smith",
-  type: :binary, # the Ecto data type
-  redacted: false
-%}
-```
-
-So for example, if you wanted every last name to be red except for the Author table, which should have blue last names, you could do the following:
-
-``` elixir
-@impl Dumper.Config
-def display(%{field: :last_name, module: Library.Authors.Author} = assigns) do
-  ~H|<span style="color: blue"><%= @value %></span>|
-end
-
-def display(%{field: :last_name} = assigns) do
-  ~H|<span style="color: red"><%= @value %></span>|
-end
-```
-
-This is admittedly a contrived example, but it can be very useful if you want to change how a particular field, an entire table, or data type is displayed
-
-#### CSS Styling
-
-Note that LiveDashboard ships with [Bootstrap 4.6](https://getbootstrap.com/docs/4.6), so you are free to use Bootstrap classes in your styling to help achieve a consistent look and feel.
 
 
 ## Other notes

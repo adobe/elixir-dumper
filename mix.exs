@@ -63,13 +63,14 @@ defmodule Dumper.MixProject do
   defp docs do
     [
       main: "readme",
-      assets: "assets",
+      assets: %{"assets" => "assets"},
       source_ref: "v#{@version}",
       source_url: @url,
       extras: [
         "CHANGELOG.md": [title: "Changelog"],
         "README.md": [title: "Dumper"]
-      ]
+      ],
+      filter_modules: "Dumper.Config"
     ]
   end
 end
