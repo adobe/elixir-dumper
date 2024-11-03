@@ -28,6 +28,9 @@ defmodule Dumper.Config do
     end
   end
 
+  def ids_to_schema(), do: %{}
+  def display(assigns), do: default_display(assigns)
+
   def default_display(assigns) do
     assigns = assign(assigns, :schema, Dumper.config_module().ids_to_schema()[assigns.field])
 
