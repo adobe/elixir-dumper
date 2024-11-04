@@ -2,7 +2,12 @@
   No records
 </p>
 
-<div class="card tabular-card mt-4">
+<div :if={!Enum.empty?(@records)} class="card tabular-card mt-4">
+  <% module = List.first(@records).__struct__ %>
+  <% fields = fields(module) %>
+  <% embeds = embeds(module) %>
+  <% redacted_fields = redacted_fields(module) %>
+
   <div class="card-body p-0">
     <div class="dash-table-wrapper">
       <table
@@ -11,26 +16,26 @@
       >
         <thead class="">
           <tr>
-            <th :for={field <- fields(@records)} :if={field not in embeds(@records)} class="">
+            <th :for={field <- fields} :if={field not in embeds} class="">
               <%= field %>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr :for={record <- @records}>
-            <td :for={field <- fields(@records)} :if={field not in embeds(@records)} class="">
+            <td :for={field <- fields} :if={field not in embeds} class="">
               <%= if field == :id do %>
-                <.record_link module={record.__struct__} record_id={record.id}>
+                <.record_link module={module} record_id={record.id}>
                   <%= record.id %>
                 </.record_link>
               <% else %>
                 <.value
-                  module={record.__struct__}
+                  module={module}
                   field={field}
                   resource={record}
                   value={Map.get(record, field)}
-                  type={record.__struct__.__schema__(:type, field)}
-                  redacted={field in redacted_fields(record)}
+                  type={module.__schema__(:type, field)}
+                  redacted={field in redacted_fields}
                 />
               <% end %>
             </td>

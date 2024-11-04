@@ -27,7 +27,7 @@ defmodule Dumper.ShowRecord do
       <div class="card-body p-0">
         <div class="dash-table-wrapper">
           <table class="table table-sm table-hover table-bordered mt-0 dash-table">
-            <tr :for={field <- @module.__schema__(:fields)}>
+            <tr :for={field <- fields(@module)}>
               <td scope="row" style="background-color: #f2f4f9;"><strong><%= field %></strong></td>
               <td class="">
                 <.value
@@ -36,7 +36,7 @@ defmodule Dumper.ShowRecord do
                   resource={@record}
                   value={Map.get(@record, field)}
                   type={@module.__schema__(:type, field)}
-                  redacted={field in redacted_fields(@record)}
+                  redacted={field in redacted_fields(@module)}
                 />
               </td>
             </tr>

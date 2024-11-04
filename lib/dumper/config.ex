@@ -186,7 +186,7 @@ defmodule Dumper.Config do
   def default_display(assigns) do
     assigns = assign(assigns, :schema, Dumper.config_module().ids_to_schema()[assigns.field])
 
-    if assigns.schema do
+    if assigns.schema && assigns.value do
       ~H|<Dumper.record_link module={@schema} record_id={@value}><%= @value %></Dumper.record_link>|
     else
       Dumper.default_style_value(assigns)

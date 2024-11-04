@@ -56,9 +56,9 @@ defmodule Dumper do
     module |> Atom.to_string() |> String.split("_") |> Enum.map_join(" ", &String.capitalize/1)
   end
 
-  def fields([record | _]), do: record.__struct__.__schema__(:fields)
-  def embeds([record | _]), do: record.__struct__.__schema__(:embeds)
-  def redacted_fields(record), do: record.__struct__.__schema__(:redact_fields)
+  def fields(module), do: module.__schema__(:fields)
+  def embeds(module), do: module.__schema__(:embeds)
+  def redacted_fields(module), do: module.__schema__(:redact_fields)
   def custom_record_links(record), do: config_module().custom_record_links(record)
 
   def value(assigns) do
