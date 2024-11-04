@@ -43,9 +43,9 @@ defmodule Dumper do
     assigns = assign(assigns, markdown: markdown_html, doctext: doctext)
 
     ~H"""
-    <details :if={@doctext != ""} class="markdown mb-4">
+    <details :if={@doctext != ""} class="markdown mt-2">
       <summary class="cursor-pointer">Documentation</summary>
-      <div class="mt-[.5rem]"><%= @markdown %></div>
+      <div class="mt-1"><%= @markdown %></div>
     </details>
     """
   end

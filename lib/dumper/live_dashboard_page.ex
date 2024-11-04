@@ -74,7 +74,7 @@ defmodule Dumper.LiveDashboardPage do
   def render(assigns) do
     ~H"""
     <div id="dumper">
-      <div class="mb-3"><a href="#" phx-click="dumper-home">Dumper Home</a></div>
+      <div><a href="#" phx-click="dumper-home">Dumper Home</a></div>
       <.show_table_names :if={@action == :show_table_names} {assigns} />
       <.show_table :if={@action == :show_table} {assigns} />
       <.show_record :if={@action == :show_record} {assigns} />

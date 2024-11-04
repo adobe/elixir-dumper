@@ -1,14 +1,15 @@
 defmodule Dumper.ShowTable do
   use Phoenix.Component
 
-  alias Phoenix.LiveDashboard.PageBuilder
   import Dumper
   import Phoenix.HTML.Form
 
   def show_table(assigns) do
     ~H"""
-    <PageBuilder.card_title title={module_name(@module)} />
-    <.docs module={@module} />
+    <div class="pt-3">
+      <h5 class="mb-0"><%= module_name(@module) %></h5>
+      <.docs module={@module} />
+    </div>
 
     <form phx-change="select_limit" class="form-inline">
       <div class="form-row align-items-center">
@@ -28,7 +29,7 @@ defmodule Dumper.ShowTable do
       </div>
     </form>
 
-    <div class="mb-2">
+    <div class="mt-3 mb-2">
       <.table_records records={@records.entries} />
     </div>
 

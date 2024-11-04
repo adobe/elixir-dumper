@@ -2,7 +2,7 @@
   No records
 </p>
 
-<div :if={!Enum.empty?(@records)} class="card tabular-card mt-4">
+<div :if={!Enum.empty?(@records)} class="card tabular-card">
   <% module = List.first(@records).__struct__ %>
   <% fields = fields(module) %>
   <% embeds = embeds(module) %>
