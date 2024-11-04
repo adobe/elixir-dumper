@@ -70,6 +70,19 @@ defmodule MyApp.DumperConfig do
   end
 
   @impl Dumper.Config
+  def allowed_fields() do
+    %{Library.BookReview => [:id, :rating]}
+  end
+
+  @impl Dumper.Config
+  def excluded_fields() do
+    %{
+	  Library.Employee => [:salary, :email_address],
+	  Library.Book => [:price]
+    }
+  end
+
+  @impl Dumper.Config
   def display(%{field: :last_name} = assigns) do
     ~H|<span style="color: red"><%= @value %></span>|
   end
@@ -85,7 +98,7 @@ end
 
 ```
 
-Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.display/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
+Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.allowed_fields/0`, `c:Dumper.Config.excluded_fields/0`, `c:Dumper.Config.display/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
 
 ![dumper](assets/no-links-vs-links.png)
 
@@ -106,6 +119,8 @@ You can refine that down to a specific schema and/or field as well by pattern ma
 
 ### Security
 As with LiveDashboard more broadly, it is highly recommended that you put the route behind some sort of [admin authentication](https://hexdocs.pm/phoenix_live_dashboard/Phoenix.LiveDashboard.html#module-extra-add-dashboard-access-on-all-environments-including-production) if you want to use `dumper` in production.
+
+The `c:Dumper.Config.allowed_fields/0` and `c:Dumper.Config.excluded_fields/0`callbacks are another way to be explicit about what data is shown or hidden altogether.
 
 You could also hide the plugin altogether by modifying the live_dashboard route.  For example, this would require a `:dumper` `enabled: true` config to be set in order to display the `dumper` tab in the live dashboard:
 

@@ -137,6 +137,63 @@ defmodule Dumper.Config do
   """
   @callback custom_record_links(record :: map) :: [{route :: binary, display_text :: binary}]
 
+  @doc """
+  A mapping from schema module => list of its fields that will be rendered.
+
+      @impl Dumper.Config
+      def allowed_fields() do
+        %{
+          Library.Patron => [:id, :last_name],
+          Library.Book => [:title]
+        }
+      end
+
+  In the above example, when displaying any patron record, the only fields that will be rendered
+  at all will be the `id` and `last_name` fields.  All others will be completely hidden, and not
+  even sent down through the `c:display/1` callback.  The same for any book record; only the title
+  will be rendered.  All other schemas are unaffected - for example a `Author` schema would display
+  all of its fields, even though it is not included in the returned map.
+
+  The allowed fields will only hide fields for a module if the module exists as a key in the
+  returned map.
+
+  It's recommended to at least include the primary key field in the list so that there is at least
+  one field to display.
+
+  If a module exists as a key in this map, its entry (or lack thereof) in the `c:excluded_fields/0`
+  callback is ignored.
+  """
+  @callback allowed_fields() :: :map
+
+  @doc """
+  A mapping from schema module => list of its fields that will be excluded from being rendered.
+
+      @impl Dumper.Config
+      def excluded_fields() do
+        %{
+          Library.Patron => [:email_address, :date_of_birth],
+          Library.Book => [:purchase_price]
+        }
+      end
+
+  In the above example, when displaying any patron record, the `email_address` and `date_of_birth`
+  fields will not be rendered.  All others fields will be displayed.  The `email_address` and
+  `date_of_birth` fields will not even be sent down through the `c:display/1` callback.  The
+  same for any book record; the `purchase_price` field will never be rendered.  All other
+  schemas are unaffected - for example a `Author` schema would display all of its fields, even
+  though it is not included in the returned map.
+
+  The excluded fields will only hide fields for a module if the module exists as a key in the
+  returned map.
+
+  It's recommended to at least include the primary key field in the list so that there is at least
+  one field to display.
+
+  If a module exists as a key in this map as well as the `c:allowed_fields/0` map, the excluded fields list
+  is ignored.
+  """
+  @callback excluded_fields() :: :map
+
   use Phoenix.Component
 
   defmacro __using__(_opts) do
@@ -148,10 +205,18 @@ defmodule Dumper.Config do
       @impl Dumper.Config
       def ids_to_schema(), do: %{}
 
+      @impl Dumper.Config
+      def allowed_fields(), do: %{}
+
+      @impl Dumper.Config
+      def excluded_fields(), do: %{}
+
       @before_compile {Dumper.Config, :add_display_fallback}
       @before_compile {Dumper.Config, :add_custom_record_links_fallback}
 
       defoverridable ids_to_schema: 0
+      defoverridable allowed_fields: 0
+      defoverridable excluded_fields: 0
     end
   end
 

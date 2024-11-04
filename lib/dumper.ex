@@ -56,7 +56,28 @@ defmodule Dumper do
     module |> Atom.to_string() |> String.split("_") |> Enum.map_join(" ", &String.capitalize/1)
   end
 
-  def fields(module), do: module.__schema__(:fields)
+  def fields(module) do
+    config = config_module()
+    all = module.__schema__(:fields)
+    allowed = config.allowed_fields()
+    excluded = config.excluded_fields()
+
+    cond do
+      Map.has_key?(allowed, module) ->
+        Enum.filter(allowed[module], fn f -> f in all end)
+
+      # MapSet.new(allowed[module]) |> MapSet.intersection(MapSet.new(all)) |> MapSet.to_list()
+
+      Map.has_key?(excluded, module) ->
+        Enum.reduce(excluded[module], all, fn f, acc -> List.delete(acc, f) end)
+
+      # MapSet.new(all) |> MapSet.difference(MapSet.new(excluded[module])) |> MapSet.to_list()
+
+      :all_fields ->
+        all
+    end
+  end
+
   def embeds(module), do: module.__schema__(:embeds)
   def redacted_fields(module), do: module.__schema__(:redact_fields)
   def custom_record_links(record), do: config_module().custom_record_links(record)
