@@ -45,7 +45,7 @@ defmodule Dumper do
     ~H"""
     <details :if={@doctext != ""} class="markdown mt-2">
       <summary class="cursor-pointer">Documentation</summary>
-      <div class="mt-1"><%= @markdown %></div>
+      <div class="card bg-light mt-1 p-3 small"><%= @markdown %></div>
     </details>
     """
   end

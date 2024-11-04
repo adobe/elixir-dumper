@@ -77,8 +77,8 @@ defmodule MyApp.DumperConfig do
   @impl Dumper.Config
   def excluded_fields() do
     %{
-	  Library.Employee => [:salary, :email_address],
-	  Library.Book => [:price]
+      Library.Employee => [:salary, :email_address],
+      Library.Book => [:price]
     }
   end
 
@@ -90,8 +90,8 @@ defmodule MyApp.DumperConfig do
   @impl Dumper.Config
   def custom_record_links(%Library.Book{} = book) do
     [
-      {~p"/logging/#{book.id}", "Logs"},
       {"https://goodreads.com/search?q=#{book.title}", "Goodreads"},
+      {~p"/logging/#{book.id}", "Logs"}
     ]
   end
 end
@@ -100,7 +100,7 @@ end
 
 Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.allowed_fields/0`, `c:Dumper.Config.excluded_fields/0`, `c:Dumper.Config.display/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
 
-![dumper](assets/no-links-vs-links.png)
+![dumper](assets/custom-links.png)
 
 
 ## Other notes
