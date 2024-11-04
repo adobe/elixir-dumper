@@ -75,7 +75,7 @@ defmodule Dumper do
     do: ~H|<span class="badge badge-success">true</span>|
 
   def default_style_value(%{value: false} = assigns),
-    do: ~H|<span class="badge badge-secondary">false</span>|
+    do: ~H|<span class="badge badge-danger">false</span>|
 
   def default_style_value(%{type: :binary_id} = assigns),
     do: ~H|<pre class="mb-0"><%= @value %></pre>|
