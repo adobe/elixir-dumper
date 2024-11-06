@@ -19,6 +19,7 @@ defmodule Dumper.MixProject do
       app: :dumper,
       version: @version,
       elixir: "~> 1.15",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -39,6 +40,9 @@ defmodule Dumper.MixProject do
     ]
   end
 
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
@@ -48,7 +52,11 @@ defmodule Dumper.MixProject do
       {:phoenix_live_dashboard, ">= 0.8.3"},
       {:phoenix_live_view, ">= 0.19.0"},
       {:phoenix_html, ">= 3.3.0"},
-      {:ex_doc, "~> 0.33", runtime: false, only: :dev}
+      {:ex_doc, "~> 0.33", runtime: false, only: :dev},
+      {:ecto_sql, "~> 3.5", only: [:dev, :test]},
+      {:ecto_sqlite3, "~> 0.7", only: :test},
+      {:floki, "~> 0.36.0", only: :test},
+      {:faker, "~> 0.17", only: :test}
     ]
   end
 

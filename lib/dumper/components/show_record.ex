@@ -62,7 +62,11 @@ defmodule Dumper.ShowRecord do
       </div>
     </div>
 
-    <div :for={{assoc, result} <- @associations} :if={!Enum.empty?(result.entries)}>
+    <div
+      :for={{assoc, result} <- @associations}
+      :if={!Enum.empty?(result.entries)}
+      data-association={assoc}
+    >
       <details open>
         <summary>
           <span><%= humanize_association_name(assoc) %></span>

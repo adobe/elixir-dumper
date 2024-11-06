@@ -252,6 +252,12 @@ defmodule Dumper.Config do
   def ids_to_schema(), do: %{}
 
   @doc false
+  def allowed_fields(), do: %{}
+
+  @doc false
+  def excluded_fields(), do: %{}
+
+  @doc false
   def custom_record_links(_), do: []
 
   @doc false
