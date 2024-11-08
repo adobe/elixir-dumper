@@ -35,7 +35,7 @@
         </thead>
         <tbody>
           <tr :for={record <- @records}>
-            <td :for={field <- fields} :if={field not in embeds} class="">
+            <td :for={field <- fields} :if={field not in embeds} data-field={field}>
               <%= if field == :id do %>
                 <.record_link module={module} record_id={record.id}>
                   <%= record.id %>

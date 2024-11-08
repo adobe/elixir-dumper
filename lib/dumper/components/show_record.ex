@@ -47,7 +47,7 @@ defmodule Dumper.ShowRecord do
           <table class="table table-sm table-hover table-bordered mt-0 dash-table">
             <tr :for={field <- fields(@module)}>
               <td scope="row" style="background-color: #f2f4f9;"><strong><%= field %></strong></td>
-              <td class="">
+              <td data-field={field}>
                 <.value
                   module={@module}
                   field={field}

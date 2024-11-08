@@ -44,6 +44,7 @@ defmodule Dumper.Config do
   Then tell your `config.exs` where to find the module:
 
       config :dumper,
+        otp_app: :my_app,
         repo: MyApp.Repo,
         config_module: MyApp.DumperConfig # <---- add this
 

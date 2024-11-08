@@ -85,8 +85,6 @@ defmodule Dumper.DumperTest do
     view |> element("#dumper td a", "100") |> render_click() |> follow_redirect(conn)
   end
 
-  defp result_rows(html), do: html |> Floki.parse_document!() |> Floki.find("tbody tr")
-
   defp change_page_size(view, limit) do
     view |> element("#dumper form", "Showing at most") |> render_change(%{"limit" => limit})
   end
@@ -95,7 +93,7 @@ defmodule Dumper.DumperTest do
   defp prev_page(view), do: view |> element("#dumper a", "Prev") |> render_click()
 
   defp results_between(html) do
-    rows = result_rows(html)
+    rows = html |> Floki.parse_document!() |> Floki.find("tbody tr")
 
     to_int = fn tr ->
       tr

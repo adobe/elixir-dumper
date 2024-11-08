@@ -51,6 +51,7 @@ It is *highly recommended* to customize the `dumper`.  To do so, you can optiona
 
 ``` elixir
 config :dumper,
+  otp_app: :my_app,
   repo: MyApp.Repo,
   config_module: MyApp.DumperConfig # <---- add this
 ```
