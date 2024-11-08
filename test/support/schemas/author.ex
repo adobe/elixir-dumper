@@ -1,4 +1,5 @@
 defmodule Author do
+  @moduledoc false
   use Ecto.Schema
 
   schema "authors" do

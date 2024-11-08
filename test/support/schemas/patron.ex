@@ -1,4 +1,5 @@
 defmodule Patron do
+  @moduledoc false
   use Ecto.Schema
 
   schema "patrons" do

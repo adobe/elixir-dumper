@@ -1,4 +1,5 @@
 defmodule Loan do
+  @moduledoc false
   use Ecto.Schema
 
   schema "loans" do

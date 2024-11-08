@@ -61,6 +61,8 @@ defmodule Dumper.Config do
       end
   """
 
+  use Phoenix.Component
+
   @doc """
   A map of ids (as atoms) to the schema module they should link to.
 
@@ -204,8 +206,6 @@ defmodule Dumper.Config do
   """
   @callback excluded_fields() :: :map
 
-  use Phoenix.Component
-
   defmacro __using__(_opts) do
     quote do
       @behaviour Dumper.Config
@@ -213,13 +213,13 @@ defmodule Dumper.Config do
       use Phoenix.Component
 
       @impl Dumper.Config
-      def ids_to_schema(), do: %{}
+      def ids_to_schema, do: %{}
 
       @impl Dumper.Config
-      def allowed_fields(), do: %{}
+      def allowed_fields, do: %{}
 
       @impl Dumper.Config
-      def excluded_fields(), do: %{}
+      def excluded_fields, do: %{}
 
       @before_compile {Dumper.Config, :add_display_fallback}
       @before_compile {Dumper.Config, :add_custom_record_links_fallback}
@@ -249,13 +249,13 @@ defmodule Dumper.Config do
   end
 
   @doc false
-  def ids_to_schema(), do: %{}
+  def ids_to_schema, do: %{}
 
   @doc false
-  def allowed_fields(), do: %{}
+  def allowed_fields, do: %{}
 
   @doc false
-  def excluded_fields(), do: %{}
+  def excluded_fields, do: %{}
 
   @doc false
   def custom_record_links(_), do: []

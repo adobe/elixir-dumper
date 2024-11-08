@@ -9,6 +9,7 @@
 # governing permissions and limitations under the License.
 
 defmodule Dumper.ShowTableNames do
+  @moduledoc false
   use Phoenix.Component
 
   alias Phoenix.LiveDashboard.PageBuilder
@@ -31,7 +32,7 @@ defmodule Dumper.ShowTableNames do
 
   defp fetch_all_tables(params, _node) do
     %{search: search, sort_by: _sort_by, sort_dir: sort_dir, limit: limit} = params
-    search = (search || "") |> String.downcase()
+    search = String.downcase(search || "")
 
     otp_app = Application.fetch_env!(:dumper, :otp_app)
     {:ok, modules} = :application.get_key(otp_app, :modules)
@@ -42,10 +43,10 @@ defmodule Dumper.ShowTableNames do
       |> Enum.map(fn module -> %{name: module |> Module.split() |> Enum.join(".")} end)
 
     # apply search
-    modules = modules |> Enum.filter(fn %{name: name} -> String.downcase(name) =~ search end)
+    modules = Enum.filter(modules, fn %{name: name} -> String.downcase(name) =~ search end)
 
     # sort
-    modules = modules |> Enum.sort(sort_dir)
+    modules = Enum.sort(modules, sort_dir)
 
     {Enum.take(modules, limit), Enum.count(modules)}
   end

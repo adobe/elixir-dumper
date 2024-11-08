@@ -9,6 +9,7 @@
 # governing permissions and limitations under the License.
 
 defmodule Dumper.ShowRecord do
+  @moduledoc false
   use Phoenix.Component
 
   import Dumper

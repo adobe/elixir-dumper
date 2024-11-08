@@ -15,6 +15,7 @@ end
 
 defmodule DumperTest.Router do
   use Phoenix.Router
+
   import Phoenix.LiveDashboard.Router
 
   pipeline :browser do

@@ -1,4 +1,5 @@
 defmodule BookReview do
+  @moduledoc false
   use Ecto.Schema
 
   schema "book_reviews" do

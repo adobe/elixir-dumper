@@ -56,7 +56,8 @@ defmodule Dumper.MixProject do
       {:ecto_sql, "~> 3.5", only: [:dev, :test]},
       {:ecto_sqlite3, "~> 0.7", only: :test},
       {:floki, "~> 0.36.0", only: :test},
-      {:faker, "~> 0.17", only: :test}
+      {:faker, "~> 0.17", only: :test},
+      {:styler, "~> 1.1", only: [:dev, :test], runtime: false}
     ]
   end
 

@@ -11,13 +11,14 @@
 defmodule Dumper.LiveDashboardPage do
   @moduledoc false
 
-  alias Phoenix.LiveDashboard.PageBuilder
   use Phoenix.LiveDashboard.PageBuilder, refresher?: false
 
-  import Dumper.ShowTableNames
-  import Dumper.ShowTable
   import Dumper.ShowRecord
+  import Dumper.ShowTable
+  import Dumper.ShowTableNames
   import Ecto.Query
+
+  alias Phoenix.LiveDashboard.PageBuilder
 
   @assoc_page_size 5
 

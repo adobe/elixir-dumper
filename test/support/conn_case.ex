@@ -19,17 +19,15 @@ defmodule Dumper.ConnCase do
 
   using do
     quote do
-      # The default endpoint for testing
-      @endpoint DumperTest.Endpoint
-
       use Phoenix.VerifiedRoutes,
-        endpoint: @endpoint,
+        endpoint: DumperTest.Endpoint,
         router: DumperTest.Router
+
+      import Dumper.ConnCase
+      import Phoenix.ConnTest
 
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
-      import Dumper.ConnCase
     end
   end
 
