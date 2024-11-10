@@ -97,32 +97,6 @@ defmodule Dumper do
     config_module().display(assigns)
   end
 
-  def default_style_value(%{redacted: true} = assigns), do: ~H|<span class="badge badge-secondary">redacted</span>|
-
-  def default_style_value(%{value: nil} = assigns), do: ~H|<span class="badge badge-secondary">nil</span>|
-
-  def default_style_value(%{value: true} = assigns), do: ~H|<span class="badge badge-success">true</span>|
-
-  def default_style_value(%{value: false} = assigns), do: ~H|<span class="badge badge-danger">false</span>|
-
-  def default_style_value(%{type: :binary_id} = assigns), do: ~H|<pre class="mb-0"><%= @value %></pre>|
-
-  def default_style_value(%{type: :date} = assigns) do
-    ~H"""
-    <%= @value |> Calendar.strftime("%b %d, %Y") %>
-    """
-  end
-
-  def default_style_value(%{type: type} = assigns)
-      when type in ~w/utc_datetime_usec naive_datetime_usec utc_datetime naive_datetime/a do
-    ~H"""
-    <span><%= Calendar.strftime(@value, "%b %d, %Y") %></span>
-    &nbsp; <span><%= Calendar.strftime(@value, "%I:%M:%S.%f %p") %></span>
-    """
-  end
-
-  def default_style_value(assigns), do: ~H|<pre class="mb-0"><%= inspect(@value, pretty: true) %></pre>|
-
   def paginate(query, %{"pagenum" => page, "page_size" => page_size}) do
     page = if is_binary(page), do: String.to_integer(page), else: page
     page = max(1, page)

@@ -266,12 +266,28 @@ defmodule Dumper.Config do
 
   @doc false
   def default_display(assigns) do
-    assigns = assign(assigns, :schema, Dumper.config_module().ids_to_schema()[assigns.field])
-
-    if assigns.schema && assigns.value do
-      ~H|<Dumper.record_link module={@schema} record_id={@value}><%= @value %></Dumper.record_link>|
-    else
-      Dumper.default_style_value(assigns)
-    end
+    assigns = assign(assigns, id_link_schema: Dumper.config_module().ids_to_schema()[assigns.field])
+    default_style_value(assigns)
   end
+
+  defp default_style_value(%{id_link_schema: schema} = assigns) when not is_nil(schema) do
+    ~H|<Dumper.record_link module={@id_link_schema} record_id={@value}><%= @value %></Dumper.record_link>|
+  end
+
+  defp default_style_value(%{redacted: true} = assigns), do: ~H|<span class="badge badge-secondary">redacted</span>|
+  defp default_style_value(%{value: nil} = assigns), do: ~H|<span class="badge badge-secondary">nil</span>|
+  defp default_style_value(%{value: true} = assigns), do: ~H|<span class="badge badge-success">true</span>|
+  defp default_style_value(%{value: false} = assigns), do: ~H|<span class="badge badge-danger">false</span>|
+  defp default_style_value(%{type: :binary_id} = assigns), do: ~H|<pre class="mb-0"><%= @value %></pre>|
+  defp default_style_value(%{type: :date} = assigns), do: ~H/<%= @value |> Calendar.strftime("%b %d, %Y") %>/
+
+  defp default_style_value(%{type: type} = assigns)
+       when type in ~w/utc_datetime_usec naive_datetime_usec utc_datetime naive_datetime/a do
+    ~H"""
+    <span><%= Calendar.strftime(@value, "%b %d, %Y") %></span>
+    &nbsp; <span><%= Calendar.strftime(@value, "%I:%M:%S.%f %p") %></span>
+    """
+  end
+
+  defp default_style_value(assigns), do: ~H|<pre class="mb-0"><%= inspect(@value, pretty: true) %></pre>|
 end
