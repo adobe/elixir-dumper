@@ -1,3 +1,7 @@
+[![Hex.pm](https://img.shields.io/hexpm/v/dumper)](https://hex.pm/packages/dumper)
+[![Hexdocs.pm](https://img.shields.io/badge/docs-hexdocs.pm-purple)](https://hexdocs.pm/dumper)
+[![Github.com](https://github.com/adobe/elixir-dumper/actions/workflows/ci.yml/badge.svg)](https://github.com/adobe/elixir-dumper/actions)
+
 # Dumper
 
 _Takes your data and dumps it to the screen!_
