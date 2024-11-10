@@ -24,10 +24,14 @@ defmodule Dumper.ConnCase do
         router: DumperTest.Router
 
       import Dumper.ConnCase
+      import NavHelpers
       import Phoenix.ConnTest
+      import Phoenix.LiveViewTest
 
       # Import conveniences for testing with connections
       import Plug.Conn
+
+      @endpoint DumperTest.Endpoint
     end
   end
 

@@ -1,13 +1,5 @@
 defmodule Dumper.ConfigTest do
-  use Dumper.ConnCase
-
-  import Phoenix.LiveViewTest
-
-  # alias __MODULE__.AllowedFieldsConfig
-  # alias __MODULE__.DisplayConfig
-  # alias __MODULE__.ExcludedFieldsConfig
-  # alias __MODULE__.LinkedIdsConfig
-  # alias __MODULE__.RecordLinksConfig
+  use Dumper.ConnCase, async: true
 
   describe "custom linked ids config" do
     setup do
@@ -17,11 +9,11 @@ defmodule Dumper.ConfigTest do
     test "links work on book id=100 page", %{conn: conn} do
       {:ok, view, _html} = navigate_to_book_100(conn)
       {:ok, view, _html} = view |> element("td[data-field=\"author_id\"] a") |> render_click() |> follow_redirect(conn)
-      assert is_author_page(view)
+      assert is_author_page?(view)
     end
 
     test "links work on all books page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_books(conn)
+      {:ok, view, _html} = navigate_to_books_table(conn)
 
       {:ok, view, _html} =
         view
@@ -29,7 +21,7 @@ defmodule Dumper.ConfigTest do
         |> render_click()
         |> follow_redirect(conn)
 
-      assert is_author_page(view)
+      assert is_author_page?(view)
     end
   end
 
@@ -40,11 +32,12 @@ defmodule Dumper.ConfigTest do
 
     test "title replaced on book id=100 page", %{conn: conn} do
       {:ok, view, _html} = navigate_to_book_100(conn)
-      assert get_displayed_title_text(view) =~ "MY_UNIQUE_VALUE"
+      title_text = view |> element("td[data-field=\"title\"]") |> render()
+      assert title_text =~ "MY_UNIQUE_VALUE"
     end
 
     test "title replaced on all books page", %{conn: conn} do
-      {:ok, _view, html} = navigate_to_books(conn)
+      {:ok, _view, html} = navigate_to_books_table(conn)
 
       html
       |> Floki.parse_fragment!()
@@ -67,7 +60,7 @@ defmodule Dumper.ConfigTest do
     end
 
     test "books show only id and title on the all books page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_books(conn)
+      {:ok, view, _html} = navigate_to_books_table(conn)
       assert has_element?(view, "#dumper td[data-field=\"title\"]")
       refute has_element?(view, "#dumper td[data-field=\"author_id\"]")
     end
@@ -85,7 +78,7 @@ defmodule Dumper.ConfigTest do
     end
 
     test "books show only id and title on the all books page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_books(conn)
+      {:ok, view, _html} = navigate_to_books_table(conn)
       refute has_element?(view, "#dumper td[data-field=\"title\"]")
       assert has_element?(view, "#dumper td[data-field=\"author_id\"]")
     end
@@ -97,29 +90,6 @@ defmodule Dumper.ConfigTest do
       {:ok, _view, html} = navigate_to_book_100(conn)
       assert html =~ "example link"
     end
-  end
-
-  defp get_displayed_title_text(view) do
-    view |> element("td[data-field=\"title\"]") |> render()
-  end
-
-  defp change_page_size(view, limit) do
-    view |> element("#dumper form", "Showing at most") |> render_change(%{"limit" => limit})
-  end
-
-  defp navigate_to_books(conn) do
-    {:ok, view, _html} = live(conn, ~p"/dashboard/dumper")
-    view |> element("tr", ~r/Book\s*$/) |> render_click() |> follow_redirect(conn)
-  end
-
-  defp navigate_to_book_100(conn) do
-    {:ok, view, _html} = navigate_to_books(conn)
-    change_page_size(view, 1_000)
-    view |> element("#dumper td[data-field=\"id\"] a", ~r/100\s*/) |> render_click() |> follow_redirect(conn)
-  end
-
-  defp is_author_page(view) do
-    has_element?(view, "h5", "Author")
   end
 end
 
