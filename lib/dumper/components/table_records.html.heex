@@ -15,10 +15,11 @@ governing permissions and limitations under the License.
 </p>
 
 <div :if={!Enum.empty?(@records)} class="card tabular-card">
-  <% module = List.first(@records).__struct__ %>
-  <% fields = fields(module) %>
-  <% embeds = embeds(module) %>
-  <% redacted_fields = redacted_fields(module) %>
+  <% first_record = List.first(@records) %>
+  <% module = Map.get(first_record, :__struct__) %>
+  <% fields = if module, do: fields(module), else: Map.keys(first_record) %>
+  <% embeds = if module, do: embeds(module), else: [] %>
+  <% redacted_fields = if module, do: redacted_fields(module), else: [] %>
 
   <div class="card-body p-0">
     <div class="dash-table-wrapper">
@@ -46,7 +47,7 @@ governing permissions and limitations under the License.
                   field={field}
                   resource={record}
                   value={Map.get(record, field)}
-                  type={module.__schema__(:type, field)}
+                  type={if module, do: module.__schema__(:type, field), else: nil}
                   redacted={field in redacted_fields}
                 />
               <% end %>

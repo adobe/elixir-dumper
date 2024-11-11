@@ -63,7 +63,7 @@ defmodule Dumper do
 
   def module_name(module), do: module |> to_string() |> String.replace(~r/^Elixir\./, "")
 
-  def humanize_association_name(module) do
+  def humanize_association_name(module) when is_atom(module) do
     module |> Atom.to_string() |> String.split("_") |> Enum.map_join(" ", &String.capitalize/1)
   end
 
@@ -92,6 +92,7 @@ defmodule Dumper do
   def embeds(module), do: module.__schema__(:embeds)
   def redacted_fields(module), do: module.__schema__(:redact_fields)
   def custom_record_links(record), do: config_module().custom_record_links(record)
+  def additional_associations(record), do: config_module().additional_associations(record)
 
   def value(assigns) do
     config_module().display(assigns)

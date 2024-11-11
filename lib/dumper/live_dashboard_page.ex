@@ -44,7 +44,8 @@ defmodule Dumper.LiveDashboardPage do
        module: module,
        records: Dumper.paginate(query, page),
        record: nil,
-       associations: nil
+       associations: nil,
+       additional_associations: nil
      )}
   end
 
@@ -66,7 +67,8 @@ defmodule Dumper.LiveDashboardPage do
        module: module,
        record: record,
        records: nil,
-       associations: associations
+       associations: associations,
+       additional_associations: Dumper.additional_associations(record)
      )}
   end
 
@@ -77,7 +79,8 @@ defmodule Dumper.LiveDashboardPage do
        module: nil,
        records: nil,
        record: nil,
-       associations: nil
+       associations: nil,
+       additional_associations: nil
      )}
   end
 

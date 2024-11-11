@@ -68,13 +68,29 @@ defmodule Dumper.ShowRecord do
       :if={!Enum.empty?(result.entries)}
       data-association={assoc}
     >
-      <details open>
+      <details open class="mb-3">
         <summary>
           <span><%= humanize_association_name(assoc) %></span>
         </summary>
-        <div class="d-flex flex-column mt-2 mb-4" style="gap: 0.5rem">
+        <div class="d-flex flex-column mt-2" style="gap: 0.5rem">
           <.table_records records={result.entries} />
           <.pagination records={result} assoc={assoc} />
+        </div>
+      </details>
+    </div>
+
+    <%!-- Additional associations are defined by the user, so we do not have pagination --%>
+    <div
+      :for={{assoc, records} <- @additional_associations}
+      :if={!Enum.empty?(records)}
+      data-association={assoc}
+    >
+      <details open class="mb-3">
+        <summary>
+          <span><%= humanize_association_name(assoc) %></span>
+        </summary>
+        <div class="d-flex flex-column mt-2" style="gap: 0.5rem">
+          <.table_records records={records} />
         </div>
       </details>
     </div>

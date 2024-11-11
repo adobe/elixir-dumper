@@ -151,6 +151,25 @@ defmodule Dumper.Config do
   @callback custom_record_links(record :: map) :: [{route :: binary, display_text :: binary}]
 
   @doc """
+  Additional records to be rendered on the given record's page.
+
+      @impl Dumper.Config
+      def additional_associations(%Book{id: book_id}) do
+        # look up reviews on goodreads
+        [goodreads_reviews: [top_review, lowest_review]]
+      end
+
+  For a given record, return a keyword list of association name to list of records.  Overriding
+  this callback allows you to render more data at the bottom of the page.  This is useful
+  when the given record doesn't explicitly define an association, or the data you want to
+  display doesn't live in the database.
+
+  Note that while regular associations are paginated, since these are custom we can't
+  automatically paginate them.  It's recommended to cap the number of records returned.
+  """
+  @callback additional_associations(record :: map) :: Keyword.t()
+
+  @doc """
   A mapping from schema module => list of its fields that will be rendered.
 
       @impl Dumper.Config
@@ -224,10 +243,19 @@ defmodule Dumper.Config do
 
       @before_compile {Dumper.Config, :add_display_fallback}
       @before_compile {Dumper.Config, :add_custom_record_links_fallback}
+      @before_compile {Dumper.Config, :add_additional_associations_fallback}
 
       defoverridable ids_to_schema: 0
       defoverridable allowed_fields: 0
       defoverridable excluded_fields: 0
+    end
+  end
+
+  @doc false
+  defmacro add_additional_associations_fallback(_env) do
+    quote do
+      @impl true
+      def additional_associations(_), do: []
     end
   end
 
@@ -257,6 +285,9 @@ defmodule Dumper.Config do
 
   @doc false
   def excluded_fields, do: %{}
+
+  @doc false
+  def additional_associations(_), do: []
 
   @doc false
   def custom_record_links(_), do: []

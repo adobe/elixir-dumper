@@ -91,6 +91,15 @@ defmodule Dumper.ConfigTest do
       assert html =~ "example link"
     end
   end
+
+  describe "additional associations config" do
+    test "displays links on the book id=100 page", %{conn: conn} do
+      Application.put_env(:dumper, :config_module, AdditionalAssociationsConfig)
+      {:ok, _view, html} = navigate_to_book_100(conn)
+      assert html =~ "baz"
+      assert html =~ "My Unique Association Name"
+    end
+  end
 end
 
 defmodule LinkedIdsConfig do
@@ -126,4 +135,18 @@ defmodule ExcludedFieldsConfig do
   use Dumper.Config
 
   def excluded_fields, do: %{Book => [:title]}
+end
+
+defmodule AdditionalAssociationsConfig do
+  @moduledoc false
+  use Dumper.Config
+
+  def additional_associations(%Book{id: 100}) do
+    [
+      foo: [%{id: 1, baz: "quux"}],
+      my_unique_association_name: [%{a: 2, b: 2, c: 2}, %{a: 3, b: 3, c: 3}],
+      more_authors: Repo.all(Author),
+      empty_association: []
+    ]
+  end
 end
