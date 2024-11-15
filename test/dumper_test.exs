@@ -1,5 +1,5 @@
 defmodule Dumper.DumperTest do
-  use Dumper.ConnCase, async: true
+  use Dumper.ConnCase
 
   describe "The show all schemas page" do
     test "shows 5 entries in the table", %{conn: conn} do

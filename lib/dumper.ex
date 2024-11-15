@@ -70,19 +70,22 @@ defmodule Dumper do
   def fields(module) do
     config = config_module()
     all = module.__schema__(:fields)
-    allowed = config.allowed_fields()
     excluded = config.excluded_fields()
 
-    cond do
-      Map.has_key?(allowed, module) ->
-        Enum.filter(allowed[module], fn f -> f in all end)
+    {allowed_map, allowed_strict?} =
+      case config.allowed_fields() do
+        nil -> {%{}, false}
+        %{} = m -> {m, true}
+        {m, :lenient} -> {m, false}
+        {m, _strict} -> {m, true}
+      end
 
-      # MapSet.new(allowed[module]) |> MapSet.intersection(MapSet.new(all)) |> MapSet.to_list()
+    cond do
+      allowed_strict? || Map.has_key?(allowed_map, module) ->
+        allowed_map |> Map.get(module, []) |> Enum.filter(fn f -> f in all end)
 
       Map.has_key?(excluded, module) ->
         Enum.reduce(excluded[module], all, fn f, acc -> List.delete(acc, f) end)
-
-      # MapSet.new(all) |> MapSet.difference(MapSet.new(excluded[module])) |> MapSet.to_list()
 
       :all_fields ->
         all

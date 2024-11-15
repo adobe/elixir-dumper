@@ -172,30 +172,46 @@ defmodule Dumper.Config do
   @doc """
   A mapping from schema module => list of its fields that will be rendered.
 
+  Can return
+  - `nil`: all fields in all tables are shown
+  - a map: a field is only displayed if the exact Schema + field pairing exists in the map
+  - `{map, :strict}`: a field is only displayed if the exact Schema + field pairing exists in the map
+  - `{map, :lenient}`: a field is displayed if the exact Schema + field pairing exists in the map **or** the schema module is not present in the map
+
+  Here's an example where we return a mapping of schema modules to the fields we want to allow displayed:
+
       @impl Dumper.Config
       def allowed_fields() do
         %{
-          Library.Patron => [:id, :last_name],
-          Library.Book => [:title]
+          Patron => [:id, :last_name],
+          Book => [:title]
         }
       end
 
-  In the above example, when displaying any patron record, the only fields that will be rendered
-  at all will be the `id` and `last_name` fields.  All others will be completely hidden, and not
-  even sent down through the `c:display/1` callback.  The same for any book record; only the title
-  will be rendered.  All other schemas are unaffected - for example a `Author` schema would display
-  all of its fields, even though it is not included in the returned map.
+  In the above example, the returned map defaults to strict mode.  Rendered fields would
+  include `patron.last_name` and `book.title`.  Hidden fields would include fields like
+  `patron.first_name` and `author.last_name`.
 
-  The allowed fields will only hide fields for a module if the module exists as a key in the
-  returned map.
+      @impl Dumper.Config
+      def allowed_fields() do
+        map = %{
+          Patron => [:id, :last_name],
+          Book => [:title]
+        }
+        {map, :lenient}
+      end
+
+
+  In the above example, `lenient` strictness means that `author.last_name` would now be rendered even though the `Author` key not explicitly defined in the returned mapping.
 
   It's recommended to at least include the primary key field in the list so that there is at least
   one field to display.
 
-  If a module exists as a key in this map, its entry (or lack thereof) in the `c:excluded_fields/0`
-  callback is ignored.
+  `c:excluded_fields/0` is ignored if:
+  - this callback is implemented and returns strict mode (or returns only a map)
+  - this callback is implemented and returns lenient mode, but the schema key is present in the map
   """
-  @callback allowed_fields() :: :map
+  @callback allowed_fields() :: nil | :map | {:map, :strict | :lenient}
 
   @doc """
   A mapping from schema module => list of its fields that will be excluded from being rendered.
@@ -221,8 +237,7 @@ defmodule Dumper.Config do
   It's recommended to at least include the primary key field in the list so that there is at least
   one field to display.
 
-  If a module exists as a key in this map as well as the `c:allowed_fields/0` map, the excluded fields list
-  is ignored.
+  See `c:allowed_fields/0` for cases where `c:excluded_fields/0` is ignored.
   """
   @callback excluded_fields() :: :map
 
@@ -236,7 +251,7 @@ defmodule Dumper.Config do
       def ids_to_schema, do: %{}
 
       @impl Dumper.Config
-      def allowed_fields, do: %{}
+      def allowed_fields, do: nil
 
       @impl Dumper.Config
       def excluded_fields, do: %{}
@@ -281,7 +296,7 @@ defmodule Dumper.Config do
   def ids_to_schema, do: %{}
 
   @doc false
-  def allowed_fields, do: %{}
+  def allowed_fields, do: nil
 
   @doc false
   def excluded_fields, do: %{}
