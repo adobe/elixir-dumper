@@ -203,7 +203,6 @@ defmodule Dumper.ConfigTest do
   end
 
   describe "additional associations config" do
-
     defmodule AdditionalAssociationsConfig do
       @moduledoc false
       use Dumper.Config

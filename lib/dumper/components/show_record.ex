@@ -19,7 +19,6 @@ defmodule Dumper.ShowRecord do
     <div class="mb-3">
       <div class="d-flex justify-content-between align-items-end">
         <div class="d-flex align-items-baseline pt-3">
-          <% # <PageBuilder.card_title title={module_name(@module)} /> %>
           <h5 class="mb-0"><%= module_name(@module) %></h5>
           <span class="ml-3">
             <.module_link module={@module}>See all</.module_link>

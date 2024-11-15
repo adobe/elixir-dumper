@@ -16,17 +16,19 @@ defmodule Dumper.ShowTableNames do
 
   def show_table_names(assigns) do
     ~H"""
-    <PageBuilder.live_table
-      id="dumper-index"
-      dom_id="dumper-index"
-      page={@page}
-      title="Schemas"
-      row_fetcher={&fetch_all_tables/2}
-      row_attrs={&row_attrs/1}
-      rows_name="schemas"
-    >
-      <:col field={:name} sortable={:desc} />
-    </PageBuilder.live_table>
+    <div class="pt-3">
+      <PageBuilder.live_table
+        id="dumper-index"
+        dom_id="dumper-index"
+        page={@page}
+        title="Schemas"
+        row_fetcher={&fetch_all_tables/2}
+        row_attrs={&row_attrs/1}
+        rows_name="schemas"
+      >
+        <:col field={:name} sortable={:desc} />
+      </PageBuilder.live_table>
+    </div>
     """
   end
 

@@ -107,12 +107,7 @@ defmodule Dumper.LiveDashboardPage do
   end
 
   def handle_event("show_record", %{"module" => module, "id" => record_id}, socket) do
-    to =
-      PageBuilder.live_dashboard_path(socket, %{
-        socket.assigns.page
-        | params: %{"action" => "show_record", "module" => module, "id" => record_id}
-      })
-
+    to = record_path(module, record_id, socket)
     {:noreply, push_navigate(socket, to: to)}
   end
 
@@ -134,6 +129,11 @@ defmodule Dumper.LiveDashboardPage do
     {:noreply, push_patch(socket, to: to)}
   end
 
+  def handle_event("id-search", %{"search" => search}, socket) do
+    to = record_path(socket.assigns.module, search, socket)
+    {:noreply, push_patch(socket, to: to)}
+  end
+
   defp to_module(nil), do: nil
 
   defp to_module(module_param) do
@@ -149,5 +149,12 @@ defmodule Dumper.LiveDashboardPage do
     match?({:module, _}, Code.ensure_loaded(module)) &&
       {:__schema__, 1} in module.__info__(:functions) &&
       module.__schema__(:source) != nil
+  end
+
+  defp record_path(module, record_id, socket) do
+    PageBuilder.live_dashboard_path(socket, %{
+      socket.assigns.page
+      | params: %{"action" => "show_record", "module" => module, "id" => record_id}
+    })
   end
 end
