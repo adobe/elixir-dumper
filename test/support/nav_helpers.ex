@@ -19,6 +19,7 @@ defmodule NavHelpers do
 
   def navigate_to_author_100(conn) do
     {:ok, view, _html} = navigate_to_authors_table(conn)
+    # open_browser(view)
     view |> element("#dumper td a", "100") |> render_click() |> follow_redirect(conn)
   end
 
