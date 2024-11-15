@@ -11,7 +11,7 @@
 defmodule Dumper.MixProject do
   use Mix.Project
 
-  @version "0.1.1"
+  @version "0.2.0"
   @url "https://github.com/adobe/elixir-dumper"
 
   def project do
@@ -19,6 +19,7 @@ defmodule Dumper.MixProject do
       app: :dumper,
       version: @version,
       elixir: "~> 1.15",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -39,10 +40,24 @@ defmodule Dumper.MixProject do
     ]
   end
 
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.33", runtime: false, only: :dev}
+      {:earmark, ">= 1.4.0"},
+      {:ecto, ">= 3.7.0"},
+      {:phoenix_ecto, ">= 4.4.0"},
+      {:phoenix_live_dashboard, ">= 0.8.3"},
+      {:phoenix_live_view, ">= 0.19.0"},
+      {:phoenix_html, ">= 3.3.0"},
+      {:ex_doc, "~> 0.33", runtime: false, only: :dev},
+      {:ecto_sql, "~> 3.5", only: [:dev, :test]},
+      {:ecto_sqlite3, "~> 0.7", only: :test},
+      {:floki, "~> 0.36.0", only: :test},
+      {:faker, "~> 0.17", only: :test},
+      {:styler, "~> 1.1", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -57,13 +72,14 @@ defmodule Dumper.MixProject do
   defp docs do
     [
       main: "readme",
-      assets: "assets",
+      assets: %{"assets" => "assets"},
       source_ref: "v#{@version}",
       source_url: @url,
       extras: [
         "CHANGELOG.md": [title: "Changelog"],
-        "README.md": [title: "Dumper"],
-      ]
+        "README.md": [title: "Dumper"]
+      ],
+      filter_modules: "Dumper.Config"
     ]
   end
 end

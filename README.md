@@ -1,128 +1,137 @@
+[![Hex.pm](https://img.shields.io/hexpm/v/dumper)](https://hex.pm/packages/dumper)
+[![Hexdocs.pm](https://img.shields.io/badge/docs-hexdocs.pm-purple)](https://hexdocs.pm/dumper)
+[![Github.com](https://github.com/adobe/elixir-dumper/actions/workflows/ci.yml/badge.svg)](https://github.com/adobe/elixir-dumper/actions)
+
 # Dumper
 
 _Takes your data and dumps it to the screen!_
 
-Dumper uses reflection to find all your app's ecto schemas and provide routes
-to browse their data.  This library provides a mix task to generate the
-controller and components necessary to do that.
+Dumper uses reflection to find all your app's ecto schemas and provide routes to browse their data.  It's packaged as a Live Dashboard plugin for easy navigation.
 
 ![dumper](assets/dumper.gif)
 
-
 ## Requirements
-
 Dumper only works with Phoenix 1.7+ applications that use Ecto.
 
-By default, Dumper also displays module docs for each schema.  To do this, your project must include [Earmark](https://hexdocs.pm/earmark/Earmark.html) as a dependency.
-
-
 ## About
-
 Dumper aims to make it as easy as possible for everyone on a project to access and understand its data.
 
 - All ids can be linked, so it's an incredibly fast way to explore a data model against real data.
 - Because it's implemented with reflection, it automatically covers every schema module in your project.
-- Styling is kept to a minimum so that data is front and center.
-- All associations are also shown for a given record, all on the same page.
+- Styling is kept consistent with the LiveDashboard theme so that data is front and center.
+- Associations are also shown for a given record, all on the same page.
 - Non-intrusive. No changes necessary to existing modules/files.
 - Read-only.  No accidentally deleting or editing data while browsing.
 - Shareable URLs. Having a shareable link to every record in your database is very useful for debugging. It gives everyone including non-technical teammates the ability to get a better understanding of your data model.
 
-
 ## Installation and Usage
-
 Add `dumper` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:dumper, "~> 0.1.1", only: [:dev]}
+    {:dumper, "~> 0.2.0"}
   ]
 end
 ```
 
-Update the dependencies and compile:
-```sh
-$ mix deps.get
-$ mix compile
+Add the following to your `config.exs` to point `dumper` to your Ecto Repo:
+```elixir
+config :dumper, repo: MyApp.Repo, otp_app: :my_app
 ```
 
-Run the `dumper.gen` mix task:
-
-```sh
-$ mix dumper.gen
-* creating lib/foo_web/controllers/dumper_controller.ex
-* creating lib/foo_web/controllers/dumper_html.ex
-* creating lib/foo_web/controllers/dumper_html/index.html.heex
-* creating lib/foo_web/controllers/dumper_html/show.html.heex
-* creating lib/foo_web/controllers/dumper_html/home.html.heex
-* creating lib/foo_web/controllers/dumper_html/table_records.html.heex
-* creating lib/foo_web/controllers/dumper_html/pagination.html.heex
-
-Add the following routes to router:
-
-    get "/dumper", DumperController, :home
-    get "/dumper/*resource", DumperController, :resource
-
-It's recommended to put these routes behind some kind of admin plug or environment check
-to avoid potentially leaking access to the public.
-```
-
-Like the output suggests, add the following routes to your router:
+Install and configure [Phoenix Live Dashboard](https://hexdocs.pm/phoenix_live_dashboard) if you haven't already.  Then modify `router.ex` to include the `dumper` as a plugin:
 
 ``` elixir
-get "/dumper", DumperController, :home
-get "/dumper/*resource", DumperController, :resource
+live_dashboard "/dashboard", additional_pages: [dumper: Dumper.LiveDashboardPage]
 ```
 
-It's recommended to put these routes behind some kind of admin plug or environment check to avoid potentially leaking access to the public.  For example:
-
-``` elixir
-scope "/dumper" do
-  pipe_through [:browser, :require_admin_user]
-
-  get "/", DumperController, :home
-  get "/*resource", DumperController, :resource
-end
-```
-
+You can now run your web app, navigate to dumper tab within the live dashboard, and view all your data.
 
 ## Customization
 
-The Dumper is a mix generator, not a library, so once you run it you are free (and encouraged!) to modify the generated files to suit your needs.
+### Config Module
+It is *highly recommended* to customize the `dumper`.  To do so, you can optionally define a module that implements the `Dumper.Config` behavior.  Add it to the `config.exs`:
 
-It is *highly recommended* to add your own `DumperHTML.value/1` function definitions to customize how certain fields, data types, and values are displayed.
-
-### Examples
-
-To make all `user_id` column values render a link to that specific user:
 ``` elixir
-defp value(%{field: :user_id} = assigns) do
-  ~H"""
-  <a href={~p"/dumper/users/user/#{@value}"}><%= @value %></a>
-  """
-end
+config :dumper,
+  otp_app: :my_app,
+  repo: MyApp.Repo,
+  config_module: MyApp.DumperConfig # <---- add this
 ```
 
-But maybe the `user_id` on the `books` table refers to the author.  Pattern match on the module as well to provide the different implementation:
+Here's an example config module:
+
 ``` elixir
-defp value(%{module: Book, field: :user_id} = assigns) do
-  ~H"""
-  <a href={~p"/dumper/authors/author/#{@value}"}><%= @value %></a>
-  """
+defmodule MyApp.DumperConfig do
+  use Dumper.Config
+
+  @impl Dumper.Config
+  def ids_to_schema() do
+    %{
+      book_id: Library.Book,
+      author_id: Library.Author
+    }
+  end
+
+  @impl Dumper.Config
+  def allowed_fields() do
+    %{Library.BookReview => [:id, :rating]}
+  end
+
+  @impl Dumper.Config
+  def excluded_fields() do
+    %{
+      Library.Employee => [:salary, :email_address],
+      Library.Book => [:price]
+    }
+  end
+
+  @impl Dumper.Config
+  def display(%{field: :last_name} = assigns) do
+    ~H|<span style="color: red"><%= @value %></span>|
+  end
+
+  @impl Dumper.Config
+  def custom_record_links(%Library.Book{} = book) do
+    [
+      {"https://goodreads.com/search?q=#{book.title}", "Goodreads"},
+      {~p"/logging/#{book.id}", "Logs"}
+    ]
+  end
 end
+
 ```
 
-Editing the `controllers/dumper_html.ex` file is a great way to customize the Dumper to your specific application and business logic needs.
+Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.allowed_fields/0`, `c:Dumper.Config.excluded_fields/0`, `c:Dumper.Config.display/1`, `c:Dumper.Config.additional_associations/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
+
+![dumper](assets/custom-links.png)
 
 
-## Default Behaviour you may want to change
+## Other notes
 
 ### Rendering Embeds
-The index page and association tables on the show page by default omit columns that are embeds.  This is purely for display purposes, as those values tend to take up a lot of vertical space.  If you'd like them to be displayed, remove the `:if={field not in embeds(@records)}` on lines `10` and `19` of your generated `dumper_html/table_records.html.heex` file.
+The index page and association tables on the show page by default omit columns that are embeds.  This is purely for display purposes, as those values tend to take up a lot of vertical space.  This is currently not configurable, but may be in the future.
 
 ### Redactions
-By default, schema fields with `redact: true` are hidden and replaced with the text `redacted`.  If you're running the Dumper in a non-production environment or against dummy data, you may want to disregard the redacted fields.  To do that, you can delete or modify the `defp value(%{redacted: true}) ...` function definition on lines `17-20` of `controllers/dumper_html.ex`.
+By default, schema fields with `redact: true` are hidden and replaced with the text `redacted`.  If you're running the Dumper in a non-production environment or against dummy data, you may want to disregard the redacted fields.  To do that, you can add a `display/1` function head like the following:
 
-### Tailwind
-The dumper uses tailwind classes to give it some basic styling, since it is included by default with the most recent phoenix generators.  If your project doesn't use tailwind, they won't have an effect, and you are free to delete or replace them once generated.
+``` elixir
+def display(%{redacted: true} = assigns), do: ~H|<%= @value %>|
+```
+
+You can refine that down to a specific schema and/or field as well by pattern matching the assigns.
+
+### Security
+As with LiveDashboard more broadly, it is highly recommended that you put the route behind some sort of [admin authentication](https://hexdocs.pm/phoenix_live_dashboard/Phoenix.LiveDashboard.html#module-extra-add-dashboard-access-on-all-environments-including-production) if you want to use `dumper` in production.
+
+The `c:Dumper.Config.allowed_fields/0` and `c:Dumper.Config.excluded_fields/0`callbacks are another way to be explicit about what data is shown or hidden altogether.
+
+You could also hide the plugin altogether by modifying the live_dashboard route.  For example, this would require a `:dumper` `enabled: true` config to be set in order to display the `dumper` tab in the live dashboard:
+
+``` elixir
+live_dashboard "/dashboard",
+  additional_pages: [] ++ (if Application.get_env(:dumper, :enabled, false), do: [dumper: Dumper.LiveDashboardPage], else: [])
+```
+
+This would allow you to configure showing or hiding the `dumper` based on environments.
