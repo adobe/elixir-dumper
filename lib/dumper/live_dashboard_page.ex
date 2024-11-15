@@ -31,12 +31,11 @@ defmodule Dumper.LiveDashboardPage do
   def handle_params(%{"action" => "show_table"} = params, _uri, socket) do
     page = Map.merge(%{"pagenum" => 1, "page_size" => 25}, params)
     module = to_module(params["module"])
-    query = Ecto.Queryable.to_query(module)
+    fields = module.__schema__(:fields)
 
-    query =
-      if :inserted_at in module.__schema__(:fields),
-        do: order_by(query, desc: :inserted_at, desc: :id),
-        else: query
+    query = Ecto.Queryable.to_query(module)
+    query = if :inserted_at in fields, do: order_by(query, desc: :inserted_at), else: query
+    query = if :id in fields, do: order_by(query, desc: :id), else: query
 
     {:noreply,
      assign(socket,
