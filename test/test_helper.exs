@@ -1,13 +1,7 @@
 ##################################################
 # Test phoenix web server setup
 
-Supervisor.start_link(
-  [
-    {Phoenix.PubSub, name: DumperTest.PubSub, adapter: Phoenix.PubSub.PG2},
-    DumperTest.Endpoint
-  ],
-  strategy: :one_for_one
-)
+Supervisor.start_link([DumperTest.Endpoint], strategy: :one_for_one)
 
 ##################################################
 # DB setup and seeding

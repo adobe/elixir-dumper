@@ -21,13 +21,13 @@ defmodule Dumper.ShowRecord do
         <div class="d-flex align-items-baseline pt-3">
           <h5 class="mb-0"><%= module_name(@module) %></h5>
           <span class="ml-3">
-            <.module_link module={@module}>See all</.module_link>
+            <.link navigate={"#{@dumper_home}?action=show_table&module=#{@module}"}>See all</.link>
           </span>
         </div>
 
         <div class="btn-group rounded border border-secondary" role="group" aria-label="Basic example">
           <a
-            :for={{{route, text}, i} <- Enum.with_index(custom_record_links(@record))}
+            :for={{{route, text}, i} <- Enum.with_index(custom_record_links(@record, @config_module))}
             href={route}
             class="btn btn-link"
             style={if i > 0, do: "border-left: 1px solid #6c757d"}
@@ -44,7 +44,7 @@ defmodule Dumper.ShowRecord do
       <div class="card-body p-0">
         <div class="dash-table-wrapper">
           <table class="table table-sm table-hover table-bordered mt-0 dash-table">
-            <tr :for={field <- fields(@module)}>
+            <tr :for={field <- fields(@module, @config_module)}>
               <td scope="row" style="background-color: #f2f4f9;"><strong><%= field %></strong></td>
               <td data-field={field}>
                 <.value
@@ -54,6 +54,8 @@ defmodule Dumper.ShowRecord do
                   value={Map.get(@record, field)}
                   type={@module.__schema__(:type, field)}
                   redacted={field in redacted_fields(@module)}
+                  config_module={@config_module}
+                  dumper_home={@dumper_home}
                 />
               </td>
             </tr>
@@ -72,7 +74,11 @@ defmodule Dumper.ShowRecord do
           <span><%= humanize_association_name(assoc) %></span>
         </summary>
         <div class="d-flex flex-column mt-2" style="gap: 0.5rem">
-          <.table_records records={result.entries} />
+          <.table_records
+            records={result.entries}
+            config_module={@config_module}
+            dumper_home={@dumper_home}
+          />
           <.pagination records={result} assoc={assoc} />
         </div>
       </details>
@@ -89,7 +95,7 @@ defmodule Dumper.ShowRecord do
           <span><%= humanize_association_name(assoc) %></span>
         </summary>
         <div class="d-flex flex-column mt-2" style="gap: 0.5rem">
-          <.table_records records={records} />
+          <.table_records records={records} config_module={@config_module} dumper_home={@dumper_home} />
         </div>
       </details>
     </div>

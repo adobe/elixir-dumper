@@ -65,7 +65,11 @@ defmodule Dumper.ShowTable do
     </div>
 
     <div class="mt-3 mb-2">
-      <.table_records records={@records.entries} />
+      <.table_records
+        records={@records.entries}
+        config_module={@config_module}
+        dumper_home={@dumper_home}
+      />
     </div>
 
     <.pagination records={@records} assoc={nil} />

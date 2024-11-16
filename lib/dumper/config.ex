@@ -312,12 +312,14 @@ defmodule Dumper.Config do
 
   @doc false
   def default_display(assigns) do
-    assigns = assign(assigns, id_link_schema: Dumper.config_module().ids_to_schema()[assigns.field])
+    assigns = assign(assigns, id_link_schema: assigns.config_module.ids_to_schema()[assigns.field])
     default_style_value(assigns)
   end
 
   defp default_style_value(%{id_link_schema: schema} = assigns) when not is_nil(schema) do
-    ~H|<Dumper.record_link module={@id_link_schema} record_id={@value}><%= @value %></Dumper.record_link>|
+    ~H|<.link navigate={"#{@dumper_home}?action=show_record&module=#{@id_link_schema}&id=#{@value}"}>
+  <%= @value %>
+</.link>|
   end
 
   defp default_style_value(%{redacted: true} = assigns), do: ~H|<span class="badge badge-secondary">redacted</span>|

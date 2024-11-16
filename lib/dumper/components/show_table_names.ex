@@ -22,7 +22,7 @@ defmodule Dumper.ShowTableNames do
         dom_id="dumper-index"
         page={@page}
         title="Schemas"
-        row_fetcher={&fetch_all_tables/2}
+        row_fetcher={fetch_rows(assigns.repo.config()[:otp_app])}
         row_attrs={&row_attrs/1}
         rows_name="schemas"
       >
@@ -32,25 +32,26 @@ defmodule Dumper.ShowTableNames do
     """
   end
 
-  defp fetch_all_tables(params, _node) do
-    %{search: search, sort_by: _sort_by, sort_dir: sort_dir, limit: limit} = params
-    search = String.downcase(search || "")
+  defp fetch_rows(otp_app) do
+    fn params, _node ->
+      %{search: search, sort_by: _sort_by, sort_dir: sort_dir, limit: limit} = params
+      search = String.downcase(search || "")
 
-    otp_app = Application.fetch_env!(:dumper, :otp_app)
-    {:ok, modules} = :application.get_key(otp_app, :modules)
+      {:ok, modules} = :application.get_key(otp_app, :modules)
 
-    modules =
-      modules
-      |> Enum.filter(&is_ecto_schema?/1)
-      |> Enum.map(fn module -> %{name: module |> Module.split() |> Enum.join(".")} end)
+      modules =
+        modules
+        |> Enum.filter(&is_ecto_schema?/1)
+        |> Enum.map(fn module -> %{name: module |> Module.split() |> Enum.join(".")} end)
 
-    # apply search
-    modules = Enum.filter(modules, fn %{name: name} -> String.downcase(name) =~ search end)
+      # apply search
+      modules = Enum.filter(modules, fn %{name: name} -> String.downcase(name) =~ search end)
 
-    # sort
-    modules = Enum.sort(modules, sort_dir)
+      # sort
+      modules = Enum.sort(modules, sort_dir)
 
-    {Enum.take(modules, limit), Enum.count(modules)}
+      {Enum.take(modules, limit), Enum.count(modules)}
+    end
   end
 
   defp row_attrs(%{name: module}) do

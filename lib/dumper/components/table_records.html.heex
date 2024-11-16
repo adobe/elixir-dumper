@@ -17,7 +17,7 @@ governing permissions and limitations under the License.
 <div :if={!Enum.empty?(@records)} class="card tabular-card">
   <% first_record = List.first(@records) %>
   <% module = Map.get(first_record, :__struct__) %>
-  <% fields = if module, do: fields(module), else: Map.keys(first_record) %>
+  <% fields = if module, do: fields(module, @config_module), else: Map.keys(first_record) %>
   <% embeds = if module, do: embeds(module), else: [] %>
   <% redacted_fields = if module, do: redacted_fields(module), else: [] %>
 
@@ -38,9 +38,9 @@ governing permissions and limitations under the License.
           <tr :for={record <- @records}>
             <td :for={field <- fields} :if={field not in embeds} data-field={field}>
               <%= if field == :id do %>
-                <.record_link module={module} record_id={record.id}>
+                <.link navigate={"#{@dumper_home}?action=show_record&module=#{module}&id=#{record.id}"}>
                   <%= record.id %>
-                </.record_link>
+                </.link>
               <% else %>
                 <.value
                   module={module}
@@ -49,6 +49,8 @@ governing permissions and limitations under the License.
                   value={Map.get(record, field)}
                   type={if module, do: module.__schema__(:type, field), else: nil}
                   redacted={field in redacted_fields}
+                  config_module={@config_module}
+                  dumper_home={@dumper_home}
                 />
               <% end %>
             </td>
