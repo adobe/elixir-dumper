@@ -11,7 +11,7 @@
 defmodule Dumper.MixProject do
   use Mix.Project
 
-  @version "0.2.1"
+  @version "0.2.2"
   @url "https://github.com/adobe/elixir-dumper"
 
   def project do

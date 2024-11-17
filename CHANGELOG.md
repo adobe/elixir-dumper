@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.2
+
+### Improvements
+
+* Updated the package description to reflect that it is now a LiveDashboard page and not a mix generator.
+
 ## v0.2.1
 
 ### Improvements
