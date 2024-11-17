@@ -30,7 +30,7 @@ Add `dumper` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:dumper, "~> 0.2.2"}
+    {:dumper, "~> 0.2.3"}
   ]
 end
 ```
@@ -40,6 +40,8 @@ Install and configure [Phoenix Live Dashboard](https://hexdocs.pm/phoenix_live_d
 ``` elixir
 live_dashboard "/dashboard", additional_pages: [dumper: {Dumper.LiveDashboardPage, repo: MyApp.Repo}]
 ```
+
+By default, Dumper will auto-discover all Ecto schemas associated with the provided repo's `otp_app`.  You can override this behavior by explicitly passing an app as an option with `otp_app: :my_app`.
 
 You can now run your web app, navigate to dumper tab within the live dashboard, and view all your data.
 

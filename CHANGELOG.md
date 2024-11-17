@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3
+
+### Improvements
+
+* Allow override of the auto-discovery of the `otp_app`.
+
 ## v0.2.2
 
 ### Improvements

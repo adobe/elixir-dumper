@@ -22,7 +22,7 @@ defmodule Dumper.ShowTableNames do
         dom_id="dumper-index"
         page={@page}
         title="Schemas"
-        row_fetcher={fetch_rows(assigns.repo.config()[:otp_app])}
+        row_fetcher={fetch_rows(@otp_app)}
         row_attrs={&row_attrs/1}
         rows_name="schemas"
       >
