@@ -34,8 +34,9 @@ defmodule Dumper.LiveDashboardPage do
     # it will not override a config module defined in the router options
     config_module = Map.get(params, "config_module", Dumper.Config)
     config_module = if is_binary(config_module), do: String.to_existing_atom(config_module), else: config_module
-
     session = Map.put_new(session, :config_module, config_module)
+    session = Map.put_new(session, :otp_app, session.repo.config()[:otp_app])
+
     dumper_home = PageBuilder.live_dashboard_path(socket, %{socket.assigns.page | params: %{}})
     {:ok, socket |> assign(session) |> assign(dumper_home: dumper_home)}
   end
