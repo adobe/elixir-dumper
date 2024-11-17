@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.5
+
+### Improvements
+
+* Was previously loading all associations, which caused timeouts for records with large amounts of associated records.
+* Tests are now run on PRs instead of only pushes against main.
+
 ## v0.2.4
 
 ### Improvements
