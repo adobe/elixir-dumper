@@ -1,5 +1,15 @@
+# Copyright 2024 Adobe. All rights reserved.
+# This file is licensed to you under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License. You may obtain a copy
+# of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+# OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 defmodule Dumper.ConfigTest do
-  use Dumper.ConnCase
+  use Dumper.ConnCase, async: true
 
   describe "custom linked ids config" do
     defmodule LinkedIdsConfig do
@@ -9,26 +19,14 @@ defmodule Dumper.ConfigTest do
       def ids_to_schema, do: %{book_id: Book, author_id: Author}
     end
 
-    setup do
-      Application.put_env(:dumper, :config_module, LinkedIdsConfig)
-    end
-
     test "links work on book id=100 page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_book_100(conn)
-      {:ok, view, _html} = view |> element("td[data-field=\"author_id\"] a") |> render_click() |> follow_redirect(conn)
-      assert is_author_page?(view)
+      {:ok, view, _html} = navigate_to_book_100(conn, LinkedIdsConfig)
+      assert has_element?(view, ~s(td[data-field="author_id"] a))
     end
 
     test "links work on all books page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_books_table(conn)
-
-      {:ok, view, _html} =
-        view
-        |> element("tr:first-child td[data-field=\"author_id\"] a")
-        |> render_click()
-        |> follow_redirect(conn)
-
-      assert is_author_page?(view)
+      {:ok, view, _html} = navigate_to_books_table(conn, LinkedIdsConfig)
+      assert has_element?(view, ~s(tr:first-child td[data-field="author_id"] a))
     end
   end
 
@@ -40,22 +38,18 @@ defmodule Dumper.ConfigTest do
       def display(%{field: :title} = assigns), do: ~H|MY_UNIQUE_VALUE|
     end
 
-    setup do
-      Application.put_env(:dumper, :config_module, DisplayConfig)
-    end
-
     test "title replaced on book id=100 page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_book_100(conn)
-      title_text = view |> element("td[data-field=\"title\"]") |> render()
+      {:ok, view, _html} = navigate_to_book_100(conn, DisplayConfig)
+      title_text = view |> element(~s(td[data-field="title"])) |> render()
       assert title_text =~ "MY_UNIQUE_VALUE"
     end
 
     test "title replaced on all books page", %{conn: conn} do
-      {:ok, _view, html} = navigate_to_books_table(conn)
+      {:ok, _view, html} = navigate_to_books_table(conn, DisplayConfig)
 
       html
       |> Floki.parse_fragment!()
-      |> Floki.find("td[data-field=\"title\"]")
+      |> Floki.find(~s(td[data-field="title"]))
       |> Enum.all?(fn td ->
         assert Floki.text(td) =~ "MY_UNIQUE_VALUE"
       end)
@@ -70,20 +64,16 @@ defmodule Dumper.ConfigTest do
       def allowed_fields, do: %{Book => [:id, :title]}
     end
 
-    setup do
-      Application.put_env(:dumper, :config_module, AllowedFieldsConfig)
-    end
-
     test "books show only id and title on the book id=100 page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_book_100(conn)
-      assert has_element?(view, "#dumper td[data-field=\"title\"]")
-      refute has_element?(view, "#dumper td[data-field=\"author_id\"]")
+      {:ok, view, _html} = navigate_to_book_100(conn, AllowedFieldsConfig)
+      assert has_element?(view, ~s(#dumper td[data-field="title"]))
+      refute has_element?(view, ~s(#dumper td[data-field="author_id"]))
     end
 
     test "books show only id and title on the all books page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_books_table(conn)
-      assert has_element?(view, "#dumper td[data-field=\"title\"]")
-      refute has_element?(view, "#dumper td[data-field=\"author_id\"]")
+      {:ok, view, _html} = navigate_to_books_table(conn, AllowedFieldsConfig)
+      assert has_element?(view, ~s(#dumper td[data-field="title"]))
+      refute has_element?(view, ~s(#dumper td[data-field="author_id"]))
     end
 
     test "unspecified tables are completely hidden by default (strict)", %{conn: conn} do
@@ -94,11 +84,9 @@ defmodule Dumper.ConfigTest do
         def allowed_fields, do: %{Book => [:id, :title]}
       end
 
-      Application.put_env(:dumper, :config_module, Strict)
-
       # The book_reviews association is normally shown on this page.
       # Test that it is not shown since
-      {:ok, view, _html} = navigate_to_book_100(conn)
+      {:ok, view, _html} = navigate_to_book_100(conn, Strict)
       refute has_element?(view, ~s(div[data-association="reviews"] td[data-field="review_text"]))
 
       defmodule StrictExplicit do
@@ -108,8 +96,7 @@ defmodule Dumper.ConfigTest do
         def allowed_fields, do: {%{Book => [:id, :title]}, :strict}
       end
 
-      Application.put_env(:dumper, :config_module, StrictExplicit)
-      {:ok, view, _html} = navigate_to_book_100(conn)
+      {:ok, view, _html} = navigate_to_book_100(conn, StrictExplicit)
       refute has_element?(view, ~s(div[data-association="reviews"] td[data-field="review_text"]))
     end
 
@@ -121,9 +108,7 @@ defmodule Dumper.ConfigTest do
         def allowed_fields, do: {%{Book => [:id, :title]}, :lenient}
       end
 
-      Application.put_env(:dumper, :config_module, Lenient)
-
-      {:ok, view, _html} = navigate_to_book_100(conn)
+      {:ok, view, _html} = navigate_to_book_100(conn, Lenient)
       assert has_element?(view, ~s(div[data-association="reviews"] td[data-field="review_text"]))
     end
   end
@@ -136,20 +121,16 @@ defmodule Dumper.ConfigTest do
       def excluded_fields, do: %{Book => [:title]}
     end
 
-    setup do
-      Application.put_env(:dumper, :config_module, ExcludedFieldsConfig)
-    end
-
     test "books show only id and title on the book id=100 page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_book_100(conn)
-      refute has_element?(view, "#dumper td[data-field=\"title\"]")
-      assert has_element?(view, "#dumper td[data-field=\"author_id\"]")
+      {:ok, view, _html} = navigate_to_book_100(conn, ExcludedFieldsConfig)
+      refute has_element?(view, ~s(#dumper td[data-field="title"]))
+      assert has_element?(view, ~s(#dumper td[data-field="author_id"]))
     end
 
     test "books show only id and title on the all books page", %{conn: conn} do
-      {:ok, view, _html} = navigate_to_books_table(conn)
-      refute has_element?(view, "#dumper td[data-field=\"title\"]")
-      assert has_element?(view, "#dumper td[data-field=\"author_id\"]")
+      {:ok, view, _html} = navigate_to_books_table(conn, ExcludedFieldsConfig)
+      refute has_element?(view, ~s(#dumper td[data-field="title"]))
+      assert has_element?(view, ~s(#dumper td[data-field="author_id"]))
     end
 
     test "excluded is ignored when allowed is specified", %{conn: conn} do
@@ -161,10 +142,9 @@ defmodule Dumper.ConfigTest do
         def excluded_fields, do: %{Book => [:title, :author_id]}
       end
 
-      Application.put_env(:dumper, :config_module, ExcludedIgnored)
-      {:ok, view, _html} = navigate_to_book_100(conn)
-      assert has_element?(view, "#dumper td[data-field=\"title\"]")
-      refute has_element?(view, "#dumper td[data-field=\"author_id\"]")
+      {:ok, view, _html} = navigate_to_book_100(conn, ExcludedIgnored)
+      assert has_element?(view, ~s(#dumper td[data-field="title"]))
+      refute has_element?(view, ~s(#dumper td[data-field="author_id"]))
       # strict by default, so other schemas not specified in allowed_fields hide all fields
       refute has_element?(view, ~s(div[data-association="reviews"] td[data-field="review_text"]))
 
@@ -176,10 +156,9 @@ defmodule Dumper.ConfigTest do
         def excluded_fields, do: %{Book => [:title], BookReview => [:rating]}
       end
 
-      Application.put_env(:dumper, :config_module, ExcludedIgnoredLenient)
-      {:ok, view, _html} = navigate_to_book_100(conn)
-      assert has_element?(view, "#dumper td[data-field=\"title\"]")
-      refute has_element?(view, "#dumper td[data-field=\"author_id\"]")
+      {:ok, view, _html} = navigate_to_book_100(conn, ExcludedIgnoredLenient)
+      assert has_element?(view, ~s(#dumper td[data-field="title"]))
+      refute has_element?(view, ~s(#dumper td[data-field="author_id"]))
       # when lenient, schemas not specified in allowed_fields are allowed
       # so the excluded_fields map is checked
       assert has_element?(view, ~s(div[data-association="reviews"] td[data-field="review_text"]))
@@ -196,14 +175,12 @@ defmodule Dumper.ConfigTest do
     end
 
     test "displays links on the book id=100 page", %{conn: conn} do
-      Application.put_env(:dumper, :config_module, RecordLinksConfig)
-      {:ok, _view, html} = navigate_to_book_100(conn)
+      {:ok, _view, html} = navigate_to_book_100(conn, RecordLinksConfig)
       assert html =~ "example link"
     end
   end
 
   describe "additional associations config" do
-
     defmodule AdditionalAssociationsConfig do
       @moduledoc false
       use Dumper.Config
@@ -219,8 +196,7 @@ defmodule Dumper.ConfigTest do
     end
 
     test "displays links on the book id=100 page", %{conn: conn} do
-      Application.put_env(:dumper, :config_module, AdditionalAssociationsConfig)
-      {:ok, _view, html} = navigate_to_book_100(conn)
+      {:ok, _view, html} = navigate_to_book_100(conn, AdditionalAssociationsConfig)
       assert html =~ "baz"
       assert html =~ "My Unique Association Name"
     end

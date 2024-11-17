@@ -1,32 +1,60 @@
+# Copyright 2024 Adobe. All rights reserved.
+# This file is licensed to you under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License. You may obtain a copy
+# of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+# OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+
 defmodule NavHelpers do
   @moduledoc false
+  use Phoenix.VerifiedRoutes,
+    endpoint: DumperTest.Endpoint,
+    router: DumperTest.Router
+
   import Phoenix.ConnTest
   import Phoenix.LiveViewTest
 
   @endpoint DumperTest.Endpoint
 
-  def navigate_to_dumper_home(view, conn) do
-    view |> element("a", "Dumper Home") |> render_click() |> follow_redirect(conn)
+  defp add_config_to_path(path, config) do
+    if URI.new!(path).query == nil,
+      do: path <> "?config_module=#{config}",
+      else: path <> "&config_module=#{config}"
   end
 
-  def navigate_to_books_table(conn), do: navigate_to_table(conn, "Book")
-  def navigate_to_authors_table(conn), do: navigate_to_table(conn, "Author")
-
-  defp navigate_to_table(conn, schema) do
-    {:ok, view, _html} = live(conn, "/dashboard/dumper")
-    view |> element("tr", ~r/#{schema}\s*$/) |> render_click() |> follow_redirect(conn)
+  defp href(href_element) do
+    [href] = href_element |> render() |> Floki.parse_fragment!() |> Floki.attribute("href")
+    href
   end
 
-  def navigate_to_author_100(conn) do
-    {:ok, view, _html} = navigate_to_authors_table(conn)
-    # open_browser(view)
-    view |> element("#dumper td a", "100") |> render_click() |> follow_redirect(conn)
+  def navigate_to_dumper_home(view, conn, config \\ Dumper.Config) do
+    path = view |> element("a", "Dumper Home") |> href()
+    live(conn, add_config_to_path(path, config))
   end
 
-  def navigate_to_book_100(conn) do
-    {:ok, view, _html} = navigate_to_books_table(conn)
+  def navigate_to_books_table(conn, config \\ Dumper.Config), do: navigate_to_table(conn, "Book", config)
+  def navigate_to_authors_table(conn, config \\ Dumper.Config), do: navigate_to_table(conn, "Author", config)
+
+  defp navigate_to_table(conn, schema, config) do
+    path = ~p"/dashboard/dumper?action=show_table&module=#{schema}"
+    live(conn, add_config_to_path(path, config))
+  end
+
+  def navigate_to_author_100(conn, config \\ Dumper.Config) do
+    {:ok, view, _html} = navigate_to_authors_table(conn, config)
     change_page_size(view, 1_000)
-    view |> element("#dumper td[data-field=\"id\"] a", ~r/100\s*/) |> render_click() |> follow_redirect(conn)
+    book_100_path = view |> element(~s(#dumper td[data-field="id"] a), ~r/100\s*/) |> href()
+    live(conn, add_config_to_path(book_100_path, config))
+  end
+
+  def navigate_to_book_100(conn, config \\ Dumper.Config) do
+    {:ok, view, _html} = navigate_to_books_table(conn, config)
+    change_page_size(view, 1_000)
+    book_100_path = view |> element(~s(#dumper td[data-field="id"] a), ~r/100\s*/) |> href()
+    live(conn, add_config_to_path(book_100_path, config))
   end
 
   def change_page_size(view, limit) do

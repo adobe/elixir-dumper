@@ -19,7 +19,6 @@ defmodule Dumper.Config do
       defmodule MyApp.DumperConfig do
         use Dumper.Config
 
-        @impl Dumper.Config
         def ids_to_schema() do
           %{
             book_id: Library.Book,
@@ -27,12 +26,10 @@ defmodule Dumper.Config do
           }
         end
 
-        @impl Dumper.Config
         def display(%{field: :last_name} = assigns) do
           ~H|<span style="color: red"><%= @value %></span>|
         end
 
-        @impl Dumper.Config
         def custom_record_links(%Library.Book{} = book) do
           [
             {~p"/logging/#{book.id}", "Logs"},
@@ -41,19 +38,20 @@ defmodule Dumper.Config do
         end
       end
 
-  Then tell your `config.exs` where to find the module:
+  Then update the `live_dashboard` entry in the `router.ex` file to add the config module:
 
-      config :dumper,
-        otp_app: :my_app,
-        repo: MyApp.Repo,
-        config_module: MyApp.DumperConfig # <---- add this
+      live_dashboard "/dashboard", additional_pages:
+        [dumper: {Dumper.LiveDashboardPage, repo: MyApp.Repo, config_module: MyApp.DumperConfig}]
 
-  See `c:ids_to_schema/0` for examples of how you can configure
-  automatic links of ids to records, `c:display/1` for examples of fine-grained
-  control over how column values are rendered, and `c:custom_record_links/1` for examples of
-  how to add custom metadata to the record page.
+  Implementing each callback provides a different way to control how the data is rendered:
+  - `c:ids_to_schema/0`: turn id values into clickable links
+  - `c:display/1`: define a functional component for complete control over how fields are rendered
+  - `c:custom_record_links/1`: display custom links when viewing an indivisual record
+  - `c:Dumper.Config.additional_associations/1`: display custom associations not defined in the Ecto schema
+  - `c:Dumper.Config.allowed_fields/0`: any fields not included will be ignored
+  - `c:Dumper.Config.excluded_fields/0`: any fields included will be ignored
 
-  The `use Dumper.Config` brings in the default definitions of behavior, so you can
+  The `use Dumper.Config` brings in the default definitions of behaviour, so you can
   choose to define one, all, or none of them.  As such, even this is a valid implementation
   (although it would be functionally the same as not defining a config module at all):
 
@@ -312,12 +310,14 @@ defmodule Dumper.Config do
 
   @doc false
   def default_display(assigns) do
-    assigns = assign(assigns, id_link_schema: Dumper.config_module().ids_to_schema()[assigns.field])
+    assigns = assign(assigns, id_link_schema: assigns.config_module.ids_to_schema()[assigns.field])
     default_style_value(assigns)
   end
 
   defp default_style_value(%{id_link_schema: schema} = assigns) when not is_nil(schema) do
-    ~H|<Dumper.record_link module={@id_link_schema} record_id={@value}><%= @value %></Dumper.record_link>|
+    ~H|<.link navigate={"#{@dumper_home}?action=show_record&module=#{@id_link_schema}&id=#{@value}"}>
+  <%= @value %>
+</.link>|
   end
 
   defp default_style_value(%{redacted: true} = assigns), do: ~H|<span class="badge badge-secondary">redacted</span>|

@@ -15,29 +15,6 @@ defmodule Dumper do
   import Ecto.Query
 
   embed_templates "dumper/components/*"
-  def repo, do: Application.fetch_env!(:dumper, :repo)
-  def config_module, do: Application.get_env(:dumper, :config_module, Dumper.Config)
-
-  attr :module, :any, required: true
-  slot :inner_block, required: true
-
-  def module_link(assigns) do
-    ~H"""
-    <a href="#" phx-click="show_table" phx-value-module={@module}><%= render_slot(@inner_block) %></a>
-    """
-  end
-
-  attr :module, :any, required: true
-  attr :record_id, :any, required: true
-  slot :inner_block, required: true
-
-  def record_link(assigns) do
-    ~H"""
-    <a href="#" phx-click="show_record" phx-value-module={@module} phx-value-id={@record_id}>
-      <%= render_slot(@inner_block) %>
-    </a>
-    """
-  end
 
   def docs(assigns) do
     doctext =
@@ -67,13 +44,12 @@ defmodule Dumper do
     module |> Atom.to_string() |> String.split("_") |> Enum.map_join(" ", &String.capitalize/1)
   end
 
-  def fields(module) do
-    config = config_module()
+  def fields(module, config_module) do
     all = module.__schema__(:fields)
-    excluded = config.excluded_fields()
+    excluded = config_module.excluded_fields()
 
     {allowed_map, allowed_strict?} =
-      case config.allowed_fields() do
+      case config_module.allowed_fields() do
         nil -> {%{}, false}
         %{} = m -> {m, true}
         {m, :lenient} -> {m, false}
@@ -94,14 +70,14 @@ defmodule Dumper do
 
   def embeds(module), do: module.__schema__(:embeds)
   def redacted_fields(module), do: module.__schema__(:redact_fields)
-  def custom_record_links(record), do: config_module().custom_record_links(record)
-  def additional_associations(record), do: config_module().additional_associations(record)
+  def custom_record_links(record, config_module), do: config_module.custom_record_links(record)
+  def additional_associations(record, config_module), do: config_module.additional_associations(record)
 
   def value(assigns) do
-    config_module().display(assigns)
+    assigns.config_module.display(assigns)
   end
 
-  def paginate(query, %{"pagenum" => page, "page_size" => page_size}) do
+  def paginate(query, %{"pagenum" => page, "page_size" => page_size}, repo) do
     page = if is_binary(page), do: String.to_integer(page), else: page
     page = max(1, page)
 
@@ -112,9 +88,9 @@ defmodule Dumper do
       query
       |> limit(^page_size)
       |> offset(^(page_size * (page - 1)))
-      |> repo().all()
+      |> repo.all()
 
-    total_entries = repo().aggregate(query, :count)
+    total_entries = repo.aggregate(query, :count)
     total_pages = ceil(total_entries / page_size)
 
     %{
