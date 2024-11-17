@@ -83,7 +83,7 @@ defmodule Dumper.Config do
   via a `Repo.get!(id)` call under the hood, instead of just printing the value.  This allows
   you to easily navigate through your data by clicking connected links.
   """
-  @callback ids_to_schema() :: :map
+  @callback ids_to_schema() :: map()
 
   @doc """
   Fine-grained control over how any field is rendered.  This is a functional component that takes
@@ -209,7 +209,7 @@ defmodule Dumper.Config do
   - this callback is implemented and returns strict mode (or returns only a map)
   - this callback is implemented and returns lenient mode, but the schema key is present in the map
   """
-  @callback allowed_fields() :: nil | :map | {:map, :strict | :lenient}
+  @callback allowed_fields() :: nil | map() | {map(), :strict | :lenient}
 
   @doc """
   A mapping from schema module => list of its fields that will be excluded from being rendered.
@@ -237,7 +237,7 @@ defmodule Dumper.Config do
 
   See `c:allowed_fields/0` for cases where `c:excluded_fields/0` is ignored.
   """
-  @callback excluded_fields() :: :map
+  @callback excluded_fields() :: map()
 
   defmacro __using__(_opts) do
     quote do

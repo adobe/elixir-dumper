@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.4
+
+### Improvements
+
+* Correct the `Dumper.Config` callback specs.
+
 ## v0.2.3
 
 ### Improvements
