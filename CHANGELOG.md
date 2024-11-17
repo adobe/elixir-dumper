@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.1
+
+### Improvements
+
+* Search for a record by id
+* Use router config instead of app config
+* Update links to use `<.link navigate={}>` instead of firing events
+
 ## v0.2.0
 
 ### Improvements
