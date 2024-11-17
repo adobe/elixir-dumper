@@ -25,7 +25,7 @@ defmodule Dumper.MixProject do
 
       ## Hex
       package: package(),
-      description: "A mix task to generate an interactive view of your database",
+      description: "A LiveDashboard page for browsing the data in your Ecto Repo",
 
       # Docs
       name: "Dumper",
