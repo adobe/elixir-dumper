@@ -75,7 +75,7 @@ defmodule Dumper.LiveDashboardPage do
   def handle_params(%{"action" => "show_record"} = params, _uri, socket) do
     repo = socket.assigns.repo
     module = to_module(params["module"])
-    record = module |> repo.get!(params["id"]) |> repo.preload(module.__schema__(:associations))
+    record = repo.get!(module, params["id"])
 
     associations =
       Enum.map(module.__schema__(:associations), fn assoc ->
