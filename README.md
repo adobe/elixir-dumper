@@ -35,15 +35,10 @@ def deps do
 end
 ```
 
-Add the following to your `config.exs` to point `dumper` to your Ecto Repo:
-```elixir
-config :dumper, repo: MyApp.Repo, otp_app: :my_app
-```
-
 Install and configure [Phoenix Live Dashboard](https://hexdocs.pm/phoenix_live_dashboard) if you haven't already.  Then modify `router.ex` to include the `dumper` as a plugin:
 
 ``` elixir
-live_dashboard "/dashboard", additional_pages: [dumper: Dumper.LiveDashboardPage]
+live_dashboard "/dashboard", additional_pages: [dumper: {Dumper.LiveDashboardPage, repo: MyApp.Repo}]
 ```
 
 You can now run your web app, navigate to dumper tab within the live dashboard, and view all your data.
@@ -51,13 +46,11 @@ You can now run your web app, navigate to dumper tab within the live dashboard, 
 ## Customization
 
 ### Config Module
-It is *highly recommended* to customize the `dumper`.  To do so, you can optionally define a module that implements the `Dumper.Config` behavior.  Add it to the `config.exs`:
+It is *highly recommended* to customize the `dumper`.  To do so, you can optionally define a module that implements the `Dumper.Config` behavior.  Add it to the `live_dashboard` entry in your `router.ex` file:
 
 ``` elixir
-config :dumper,
-  otp_app: :my_app,
-  repo: MyApp.Repo,
-  config_module: MyApp.DumperConfig # <---- add this
+live_dashboard "/dashboard", additional_pages:
+  [dumper: {Dumper.LiveDashboardPage, repo: MyApp.Repo, config_module: MyApp.DumperConfig}]
 ```
 
 Here's an example config module:
@@ -74,12 +67,6 @@ defmodule MyApp.DumperConfig do
     }
   end
 
-  @impl Dumper.Config
-  def allowed_fields() do
-    %{Library.BookReview => [:id, :rating]}
-  end
-
-  @impl Dumper.Config
   def excluded_fields() do
     %{
       Library.Employee => [:salary, :email_address],
@@ -87,12 +74,10 @@ defmodule MyApp.DumperConfig do
     }
   end
 
-  @impl Dumper.Config
   def display(%{field: :last_name} = assigns) do
     ~H|<span style="color: red"><%= @value %></span>|
   end
 
-  @impl Dumper.Config
   def custom_record_links(%Library.Book{} = book) do
     [
       {"https://goodreads.com/search?q=#{book.title}", "Goodreads"},
@@ -103,9 +88,9 @@ end
 
 ```
 
-Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.allowed_fields/0`, `c:Dumper.Config.excluded_fields/0`, `c:Dumper.Config.display/1`, `c:Dumper.Config.additional_associations/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
+Common customizations are using the `c:Dumper.Config.ids_to_schema/0` to turn id values into clickable links and using `c:Dumper.Config.custom_record_links/1` to provide extra links to useful information when viewing a specific record.
 
-![dumper](assets/custom-links.png)
+Take a look a `c:Dumper.Config.ids_to_schema/0`, `c:Dumper.Config.allowed_fields/0`, `c:Dumper.Config.excluded_fields/0`, `c:Dumper.Config.display/1`, `c:Dumper.Config.additional_associations/1`, and `c:Dumper.Config.custom_record_links/1` for more information on how each optional callback lets you customize how your data is rendered.
 
 
 ## Other notes
@@ -131,7 +116,7 @@ You could also hide the plugin altogether by modifying the live_dashboard route.
 
 ``` elixir
 live_dashboard "/dashboard",
-  additional_pages: [] ++ (if Application.get_env(:dumper, :enabled, false), do: [dumper: Dumper.LiveDashboardPage], else: [])
+  additional_pages: [] ++ (if Application.get_env(:dumper, :enabled, false), do: [dumper: {Dumper.LiveDashboardPage, repo: MyApp.Repo}], else: [])
 ```
 
 This would allow you to configure showing or hiding the `dumper` based on environments.
