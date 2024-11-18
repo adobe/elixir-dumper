@@ -94,7 +94,7 @@ defmodule Dumper.LiveDashboardPage do
   end
 
   def handle_params(_params, _uri, socket) do
-    {:noreply, socket |> clear_assigns()}
+    {:noreply, clear_assigns(socket)}
   end
 
   @impl true

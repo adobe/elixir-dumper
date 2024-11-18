@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.6
+
+### Improvements
+
+* Removed unnecessary `action` url parameter.  The correct page to render can be derived from the presence of the module and id parameters.
+
 ## v0.2.5
 
 ### Improvements
