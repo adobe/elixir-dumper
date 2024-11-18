@@ -38,7 +38,7 @@ governing permissions and limitations under the License.
           <tr :for={record <- @records}>
             <td :for={field <- fields} :if={field not in embeds} data-field={field}>
               <%= if field == :id do %>
-                <.link navigate={"#{@dumper_home}?action=show_record&module=#{module}&id=#{record.id}"}>
+                <.link navigate={"#{@dumper_home}?module=#{module}&id=#{record.id}"}>
                   <%= record.id %>
                 </.link>
               <% else %>

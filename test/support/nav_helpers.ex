@@ -39,7 +39,7 @@ defmodule NavHelpers do
   def navigate_to_authors_table(conn, config \\ Dumper.Config), do: navigate_to_table(conn, "Author", config)
 
   defp navigate_to_table(conn, schema, config) do
-    path = ~p"/dashboard/dumper?action=show_table&module=#{schema}"
+    path = ~p"/dashboard/dumper?module=#{schema}"
     live(conn, add_config_to_path(path, config))
   end
 
