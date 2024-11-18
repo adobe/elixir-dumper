@@ -315,7 +315,7 @@ defmodule Dumper.Config do
   end
 
   defp default_style_value(%{id_link_schema: schema} = assigns) when not is_nil(schema) do
-    ~H|<.link navigate={"#{@dumper_home}?action=show_record&module=#{@id_link_schema}&id=#{@value}"}>
+    ~H|<.link navigate={"#{@dumper_home}?module=#{@id_link_schema}&id=#{@value}"}>
   <%= @value %>
 </.link>|
   end

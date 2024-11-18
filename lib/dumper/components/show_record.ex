@@ -21,7 +21,7 @@ defmodule Dumper.ShowRecord do
         <div class="d-flex align-items-baseline pt-3">
           <h5 class="mb-0"><%= module_name(@module) %></h5>
           <span class="ml-3">
-            <.link navigate={"#{@dumper_home}?action=show_table&module=#{@module}"}>See all</.link>
+            <.link navigate={"#{@dumper_home}?module=#{@module}"}>See all</.link>
           </span>
         </div>
 

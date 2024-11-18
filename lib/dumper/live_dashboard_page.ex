@@ -43,7 +43,6 @@ defmodule Dumper.LiveDashboardPage do
 
   defp clear_assigns(socket) do
     assign(socket,
-      action: nil,
       module: nil,
       records: nil,
       record: nil,
@@ -53,29 +52,10 @@ defmodule Dumper.LiveDashboardPage do
   end
 
   @impl true
-  def handle_params(%{"action" => "show_table"} = params, _uri, socket) do
-    page = Map.merge(%{"pagenum" => 1, "page_size" => 25}, params)
-    module = to_module(params["module"])
-    fields = module.__schema__(:fields)
-
-    query = Ecto.Queryable.to_query(module)
-    query = if :inserted_at in fields, do: order_by(query, desc: :inserted_at), else: query
-    query = if :id in fields, do: order_by(query, desc: :id), else: query
-
-    {:noreply,
-     socket
-     |> clear_assigns()
-     |> assign(
-       action: :show_table,
-       module: module,
-       records: Dumper.paginate(query, page, socket.assigns.repo)
-     )}
-  end
-
-  def handle_params(%{"action" => "show_record"} = params, _uri, socket) do
+  def handle_params(%{"module" => module, "id" => id} = params, _uri, socket) do
     repo = socket.assigns.repo
-    module = to_module(params["module"])
-    record = repo.get!(module, params["id"])
+    module = to_module(module)
+    record = repo.get!(module, id)
 
     associations =
       Enum.map(module.__schema__(:associations), fn assoc ->
@@ -88,7 +68,6 @@ defmodule Dumper.LiveDashboardPage do
      socket
      |> clear_assigns()
      |> assign(
-       action: :show_record,
        module: module,
        record: record,
        associations: associations,
@@ -96,8 +75,26 @@ defmodule Dumper.LiveDashboardPage do
      )}
   end
 
+  def handle_params(%{"module" => module} = params, _uri, socket) do
+    page = Map.merge(%{"pagenum" => 1, "page_size" => 25}, params)
+    module = to_module(module)
+    fields = module.__schema__(:fields)
+
+    query = Ecto.Queryable.to_query(module)
+    query = if :inserted_at in fields, do: order_by(query, desc: :inserted_at), else: query
+    query = if :id in fields, do: order_by(query, desc: :id), else: query
+
+    {:noreply,
+     socket
+     |> clear_assigns()
+     |> assign(
+       module: module,
+       records: Dumper.paginate(query, page, socket.assigns.repo)
+     )}
+  end
+
   def handle_params(_params, _uri, socket) do
-    {:noreply, socket |> clear_assigns() |> assign(action: :show_table_names)}
+    {:noreply, socket |> clear_assigns()}
   end
 
   @impl true
@@ -105,9 +102,9 @@ defmodule Dumper.LiveDashboardPage do
     ~H"""
     <div id="dumper">
       <div><.link navigate={@dumper_home}>Dumper Home</.link></div>
-      <.show_table_names :if={@action == :show_table_names} {assigns} />
-      <.show_table :if={@action == :show_table} {assigns} />
-      <.show_record :if={@action == :show_record} {assigns} />
+      <.show_table_names :if={is_nil(@module)} {assigns} />
+      <.show_table :if={@module && is_nil(@record)} {assigns} />
+      <.show_record :if={@module && @record} {assigns} />
     </div>
     """
   end
@@ -117,7 +114,7 @@ defmodule Dumper.LiveDashboardPage do
     to =
       PageBuilder.live_dashboard_path(socket, %{
         socket.assigns.page
-        | params: %{"action" => "show_table", "module" => module}
+        | params: %{"module" => module}
       })
 
     {:noreply, push_navigate(socket, to: to)}
@@ -166,7 +163,7 @@ defmodule Dumper.LiveDashboardPage do
   defp record_path(module, record_id, socket) do
     PageBuilder.live_dashboard_path(socket, %{
       socket.assigns.page
-      | params: %{"action" => "show_record", "module" => module, "id" => record_id}
+      | params: %{"module" => module, "id" => record_id}
     })
   end
 end
