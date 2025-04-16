@@ -13,9 +13,6 @@ defmodule Dumper.LiveDashboardPage do
 
   use Phoenix.LiveDashboard.PageBuilder, refresher?: false
 
-  import Dumper.ShowRecord
-  import Dumper.ShowTable
-  import Dumper.ShowTableNames
   import Ecto.Query
 
   alias Phoenix.LiveDashboard.PageBuilder
@@ -102,9 +99,9 @@ defmodule Dumper.LiveDashboardPage do
     ~H"""
     <div id="dumper">
       <div><.link navigate={@dumper_home}>Dumper Home</.link></div>
-      <.show_table_names :if={is_nil(@module)} {assigns} />
-      <.show_table :if={@module && is_nil(@record)} {assigns} />
-      <.show_record :if={@module && @record} {assigns} />
+      <Dumper.show_table_names :if={is_nil(@module)} {assigns} />
+      <Dumper.show_table :if={@module && is_nil(@record)} {assigns} />
+      <Dumper.show_record :if={@module && @record} {assigns} />
     </div>
     """
   end

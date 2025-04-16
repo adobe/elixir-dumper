@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.7
+
+### Bug Fix
+
+* Addressed [https://github.com/adobe/elixir-dumper/issues/7](Issue #7) by removing total number of entries altogether.
+
 ## v0.2.6
 
 ### Improvements
