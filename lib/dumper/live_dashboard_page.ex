@@ -13,9 +13,6 @@ defmodule Dumper.LiveDashboardPage do
 
   use Phoenix.LiveDashboard.PageBuilder, refresher?: false
 
-  import Dumper.ShowRecord
-  import Dumper.ShowTable
-  import Dumper.ShowTableNames
   import Ecto.Query
 
   alias Phoenix.LiveDashboard.PageBuilder
@@ -79,17 +76,20 @@ defmodule Dumper.LiveDashboardPage do
     page = Map.merge(%{"pagenum" => 1, "page_size" => 25}, params)
     module = to_module(module)
     fields = module.__schema__(:fields)
+    large_table? = module in socket.assigns.config_module.large_tables()
 
     query = Ecto.Queryable.to_query(module)
-    query = if :inserted_at in fields, do: order_by(query, desc: :inserted_at), else: query
+    query = if :inserted_at in fields && !large_table?, do: order_by(query, desc: :inserted_at), else: query
     query = if :id in fields, do: order_by(query, desc: :id), else: query
+    total_entries = if large_table?, do: nil, else: socket.assigns.repo.aggregate(query, :count)
 
     {:noreply,
      socket
      |> clear_assigns()
      |> assign(
        module: module,
-       records: Dumper.paginate(query, page, socket.assigns.repo)
+       records: Dumper.paginate(query, page, socket.assigns.repo),
+       total_entries: total_entries
      )}
   end
 
@@ -102,9 +102,9 @@ defmodule Dumper.LiveDashboardPage do
     ~H"""
     <div id="dumper">
       <div><.link navigate={@dumper_home}>Dumper Home</.link></div>
-      <.show_table_names :if={is_nil(@module)} {assigns} />
-      <.show_table :if={@module && is_nil(@record)} {assigns} />
-      <.show_record :if={@module && @record} {assigns} />
+      <Dumper.show_table_names :if={is_nil(@module)} {assigns} />
+      <Dumper.show_table :if={@module && is_nil(@record)} {assigns} />
+      <Dumper.show_record :if={@module && @record} {assigns} />
     </div>
     """
   end

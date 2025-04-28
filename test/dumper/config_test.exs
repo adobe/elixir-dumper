@@ -201,4 +201,23 @@ defmodule Dumper.ConfigTest do
       assert html =~ "My Unique Association Name"
     end
   end
+
+  describe "large tables config" do
+    defmodule LargeTablesConfig do
+      @moduledoc false
+      use Dumper.Config
+
+      def large_tables, do: [Book]
+    end
+
+    test "doesn't show page count for large tables", %{conn: conn} do
+      {:ok, _view, html} = navigate_to_books_table(conn, LargeTablesConfig)
+      refute html =~ "out of"
+      assert html =~ "Showing at most"
+
+      {:ok, _view, html} = navigate_to_authors_table(conn, LargeTablesConfig)
+      assert html =~ "out of"
+      assert html =~ "Showing at most"
+    end
+  end
 end

@@ -14,6 +14,8 @@ defmodule Dumper do
 
   import Ecto.Query
 
+  alias Phoenix.LiveDashboard.PageBuilder
+
   embed_templates "dumper/components/*"
 
   def docs(assigns) do
@@ -83,23 +85,57 @@ defmodule Dumper do
 
     page_size = if is_binary(page_size), do: String.to_integer(page_size), else: page_size
     page_size = max(1, page_size)
+    page_size_plus_one = page_size + 1
 
     entries =
       query
-      |> limit(^page_size)
+      |> limit(^page_size_plus_one)
       |> offset(^(page_size * (page - 1)))
       |> repo.all()
 
-    total_entries = repo.aggregate(query, :count)
-    total_pages = ceil(total_entries / page_size)
-
     %{
-      entries: entries,
+      entries: Enum.take(entries, page_size),
       has_prev?: page > 1,
-      has_next?: page < total_pages,
+      has_next?: Enum.count(entries) == page_size_plus_one,
       page: page,
-      page_size: page_size,
-      total_entries: total_entries
+      page_size: page_size
     }
+  end
+
+  defp fetch_rows(otp_app) do
+    fn params, _node ->
+      %{search: search, sort_by: _sort_by, sort_dir: sort_dir, limit: limit} = params
+      search = String.downcase(search || "")
+
+      {:ok, modules} = :application.get_key(otp_app, :modules)
+
+      modules =
+        modules
+        |> Enum.filter(&is_ecto_schema?/1)
+        |> Enum.map(fn module -> %{name: module |> Module.split() |> Enum.join(".")} end)
+
+      # apply search
+      modules = Enum.filter(modules, fn %{name: name} -> String.downcase(name) =~ search end)
+
+      # sort
+      modules = Enum.sort(modules, sort_dir)
+
+      {Enum.take(modules, limit), Enum.count(modules)}
+    end
+  end
+
+  defp row_attrs(%{name: module}) do
+    [
+      {"phx-click", "show_table"},
+      {"phx-value-module", module},
+      {"phx-page-loading", true}
+    ]
+  end
+
+  defp is_ecto_schema?(module) do
+    # true iff it 1. is a module 2. has a __schema__ function 3. is not an Embedded Schema
+    match?({:module, _}, Code.ensure_loaded(module)) &&
+      {:__schema__, 1} in module.__info__(:functions) &&
+      module.__schema__(:source) != nil
   end
 end

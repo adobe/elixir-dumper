@@ -50,6 +50,7 @@ defmodule Dumper.Config do
   - `c:Dumper.Config.additional_associations/1`: display custom associations not defined in the Ecto schema
   - `c:Dumper.Config.allowed_fields/0`: any fields not included will be ignored
   - `c:Dumper.Config.excluded_fields/0`: any fields included will be ignored
+  - `c:Dumper.Config.large_tables/0`: tables included will not render the total record count and won't sort by inserted_at
 
   The `use Dumper.Config` brings in the default definitions of behaviour, so you can
   choose to define one, all, or none of them.  As such, even this is a valid implementation
@@ -147,6 +148,18 @@ defmodule Dumper.Config do
   pair is possible.
   """
   @callback custom_record_links(record :: map) :: [{route :: binary, display_text :: binary}]
+
+  @doc """
+  Tables so large they timeout when querying the row count.
+
+  By including schema modules in this list, Dumper will omit querying and displaying of the
+  total number of entries and order by `id` instead of `inserted_at`.  A clue you may need
+  to add a table to this list is if the page errors out when rendering the list of records.
+
+      @impl Dumper.Config
+      def large_tables, do: [Book, Patrons]
+  """
+  @callback large_tables() :: [atom]
 
   @doc """
   Additional records to be rendered on the given record's page.
@@ -249,6 +262,9 @@ defmodule Dumper.Config do
       def ids_to_schema, do: %{}
 
       @impl Dumper.Config
+      def large_tables, do: []
+
+      @impl Dumper.Config
       def allowed_fields, do: nil
 
       @impl Dumper.Config
@@ -259,6 +275,7 @@ defmodule Dumper.Config do
       @before_compile {Dumper.Config, :add_additional_associations_fallback}
 
       defoverridable ids_to_schema: 0
+      defoverridable large_tables: 0
       defoverridable allowed_fields: 0
       defoverridable excluded_fields: 0
     end
@@ -292,6 +309,9 @@ defmodule Dumper.Config do
 
   @doc false
   def ids_to_schema, do: %{}
+
+  @doc false
+  def large_tables, do: []
 
   @doc false
   def allowed_fields, do: nil
