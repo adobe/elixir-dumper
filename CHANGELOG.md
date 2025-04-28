@@ -2,6 +2,10 @@
 
 ## v0.2.7
 
+### Improvements
+
+* Added `large_tables/0` optional config to handle performance issues for tables with large row counts.  [https://github.com/adobe/elixir-dumper/issues/7](Issue #7) showed that large tables would time out when rendering the records page due to the expensive count query.  It was also discovered the order by inserted_at could also contribute to timeouts.
+
 ### Bug Fix
 
 * Addressed [https://github.com/adobe/elixir-dumper/issues/7](Issue #7) by removing total number of entries altogether.

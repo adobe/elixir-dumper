@@ -36,6 +36,9 @@ governing permissions and limitations under the License.
               </select>
             </div>
           </div>
+          <div :if={@total_entries} class="col-auto">out of <%= @total_entries %></div>
+        <% else %>
+          <div :if={@total_entries} class="col-auto">Showing <%= @total_entries %></div>
         <% end %>
       </div>
     </form>

@@ -76,17 +76,20 @@ defmodule Dumper.LiveDashboardPage do
     page = Map.merge(%{"pagenum" => 1, "page_size" => 25}, params)
     module = to_module(module)
     fields = module.__schema__(:fields)
+    large_table? = module in socket.assigns.config_module.large_tables()
 
     query = Ecto.Queryable.to_query(module)
-    query = if :inserted_at in fields, do: order_by(query, desc: :inserted_at), else: query
+    query = if :inserted_at in fields && !large_table?, do: order_by(query, desc: :inserted_at), else: query
     query = if :id in fields, do: order_by(query, desc: :id), else: query
+    total_entries = if large_table?, do: nil, else: socket.assigns.repo.aggregate(query, :count)
 
     {:noreply,
      socket
      |> clear_assigns()
      |> assign(
        module: module,
-       records: Dumper.paginate(query, page, socket.assigns.repo)
+       records: Dumper.paginate(query, page, socket.assigns.repo),
+       total_entries: total_entries
      )}
   end
 
